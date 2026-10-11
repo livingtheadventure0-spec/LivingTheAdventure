@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 const API = axios.create({
-  baseURL: "https://backend-teal-chi-88.vercel.app/", // 🔥 replace
+  baseURL: "https://living-the-adventure.vercel.app/", // 🔥 replace
 });
 
 // Request Interceptor
