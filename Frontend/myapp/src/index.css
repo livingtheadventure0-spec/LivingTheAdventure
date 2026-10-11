@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out forwards;
+}
+
+.font-bebas {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.font-cenzel-400 {
+  font-family: 'Cinzel', serif;
+  font-weight: 400;
+
+}
+.font-cenzel-600 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+
+}
+
+.font-cenzel-700 {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+
+}
