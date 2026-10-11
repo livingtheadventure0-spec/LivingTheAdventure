@@ -1,7 +1,7 @@
 // Central place to configure backend API base URL.
 // Supports Vite env override via VITE_API_BASE_URL.
 
-const DEFAULT_API_BASE_URL = "http://127.0.0.1:8000";
+const DEFAULT_API_BASE_URL = "https://living-the-adventure.vercel.app";
 
 export const API_BASE_URL = (import.meta.env?.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, "");
 
