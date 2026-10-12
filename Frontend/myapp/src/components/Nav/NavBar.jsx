@@ -29,20 +29,19 @@ function NavBar() {
 
     return (
         <>
-            <Link
-                to="/"
-                aria-label="Living the Adventure home"
-                className="fixed left-5 top-5 z-[60] flex h-16 w-36 items-center justify-start rounded-xl outline-none transition-opacity duration-200 hover:opacity-85 focus-visible:ring-2 focus-visible:ring-white/80 md:left-7 md:top-6 md:h-[76px] md:w-44"
-            >
-                <span className="flex h-full w-full items-center justify-start drop-shadow-[0_2px_8px_rgba(0,0,0,.65)]">
-                    <Logo />
-                </span>
-            </Link>
-
             <aside
                 aria-label="Main navigation"
                 className="fixed left-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col items-center rounded-full border border-white/[.13] bg-black/75 px-1.5 py-2.5 shadow-[0_8px_28px_rgba(0,0,0,.22)] backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 hover:border-white/25 hover:bg-black/90 hover:shadow-[0_12px_36px_rgba(0,0,0,.34)] md:flex"
             >
+                <Link
+                    to="/"
+                    aria-label="Living the Adventure home"
+                    className="absolute bottom-full left-1/2 mb-3 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-xl outline-none drop-shadow-[0_2px_8px_rgba(0,0,0,.7)] transition-transform duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-white/80"
+                >
+                    <span className="flex h-full w-full items-center justify-center">
+                        <Logo />
+                    </span>
+                </Link>
                 <nav className="flex flex-col items-center gap-1" aria-label="Explore">
                     {navigation.map(({ to, label, icon: Icon, end }, index) => {
                         const active = end
