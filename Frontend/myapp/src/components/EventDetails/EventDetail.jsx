@@ -17,6 +17,7 @@ import BookingSection from "./components/EventSchedule/BookingSection.jsx";
 import Highlights from "./components/EventSchedule/Highlighter.jsx";
 import InterestButton from "./InterestButton.jsx";
 import Footer from "../Footer/Footer.jsx";
+import { downloadEventPdf } from "../../utils/eventPdf.js";
 
 import {
     getApiErrorMessage,
@@ -781,13 +782,25 @@ function EventDetail() {
                             </p>
                             <p className="mt-1 hidden text-sm text-neutral-400 sm:block">Explore the schedule and booking details.</p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => document.getElementById("event-booking-section")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                            className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:min-w-40 sm:px-8"
-                        >
-                            Book Now
-                        </button>
+                        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                            <button
+                                type="button"
+                                onClick={() => downloadEventPdf(event, eventSchedule)}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-transparent px-3 py-3 text-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:px-5 sm:text-sm"
+                                aria-label="Download event details as PDF"
+                            >
+                                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/></svg>
+                                <span className="hidden sm:inline">Download PDF</span>
+                                <span className="sm:hidden">PDF</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById("event-booking-section")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                                className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:min-w-40 sm:px-8"
+                            >
+                                Book Now
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
