@@ -42,8 +42,16 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
         <div className="bg-black text-white">
             <section className="relative h-[70vh] sm:h-[80vh] lg:h-screen w-full pl-10 md:pl-0 overflow-hidden">
 
-                {/* Video */}
-                <div className={`absolute inset-0 transition-opacity duration-300 ${fade ? "opacity-0" : "opacity-100"}`}>
+                {/* Use the poster image on mobile to prevent iOS from showing a video play overlay. */}
+                <img
+                    src={activeHero.thumbnail}
+                    alt=""
+                    aria-hidden="true"
+                    className={`absolute inset-0 h-full w-full object-cover sm:hidden transition-opacity duration-300 ${fade ? "opacity-0" : "opacity-100"}`}
+                />
+
+                {/* Keep the autoplaying hero video on tablet and desktop. */}
+                <div className={`absolute inset-0 hidden sm:block transition-opacity duration-300 ${fade ? "opacity-0" : "opacity-100"}`}>
                     <video
                         className="w-full h-full object-cover"
                         src={activeHero.video}
@@ -110,11 +118,13 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        if (activeHero?.eventId) {
-                                            navigate("/eventDetails/" + activeHero.eventId);
+                                        const eventId = activeHero?.eventId;
+
+                                        if (eventId !== undefined && eventId !== null && String(eventId).trim()) {
+                                            navigate(`/eventDetails/${encodeURIComponent(String(eventId).trim())}`);
                                         }
                                     }}
-                                    disabled={!activeHero?.eventId}
+                                    disabled={activeHero?.eventId === undefined || activeHero?.eventId === null || !String(activeHero?.eventId).trim()}
                                     className="bg-white text-black font-bold py-2 sm:py-2.5 lg:py-3 px-5 sm:px-6 lg:px-8 rounded-lg text-sm sm:text-base transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     Book Now
