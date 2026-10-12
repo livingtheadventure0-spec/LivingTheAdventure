@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import fetchEventsByType from "./FetchEvent";
 import VerticalEventCard from "../Common/EventCard/VerticalEventCard";
 import Spinner from "../Spinner/Spinner";
@@ -94,8 +95,14 @@ function ViewAll({ event_type, state }) {
 
     if (!events.length) {
         return (
-            <div className="text-center text-gray-400 py-20">
-                No events found
+            <div className="flex min-h-[55vh] items-center justify-center bg-neutral-950 px-5 py-16 text-center text-white">
+                <div className="max-w-lg">
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-white/[.04] text-2xl">↗</div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-[.25em] text-white/45">Living the Adventure</p>
+                    <h2 className="text-2xl font-semibold sm:text-3xl">No {event_type} events available</h2>
+                    <p className="mt-3 text-sm leading-6 text-white/60">There are no events in this section right now. Explore our other adventures or return to the home page.</p>
+                    <Link to="/" className="mt-7 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-white/85">Visit home</Link>
+                </div>
             </div>
         );
     }
