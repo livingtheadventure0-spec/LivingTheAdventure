@@ -50,7 +50,7 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
         <section className="bg-neutral-950 py-12 sm:py-16 lg:py-20">
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <header className="mb-8 text-center sm:mb-12">
-                    <span className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300/80">Your adventure, planned</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">Your adventure, planned</span>
                     <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">Trip itinerary</h2>
                     <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-neutral-400 sm:text-base">
                         A clear day-by-day guide to the highlights, timings and experiences ahead.
@@ -61,12 +61,13 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                     {days.length > 0 && (
                         <div className="space-y-4">
                             {days.map((day, index) => {
+                                const hasStructuredActivities = Array.isArray(day.activities) && day.activities.length > 0;
                                 const activities = normalizeActivities(day);
                                 const title = day.title?.trim() || `Day ${index + 1}`;
                                 return (
                                     <article key={`${day.day || index + 1}-${index}`} className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-neutral-900 to-neutral-900/70 shadow-[0_12px_35px_rgba(0,0,0,0.18)]">
                                         <header className="flex items-center gap-4 border-b border-white/[0.08] px-4 py-4 sm:px-6 sm:py-5">
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-amber-300/30 bg-amber-300/10 text-sm font-bold text-amber-200 sm:h-12 sm:w-12">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/[0.06] text-sm font-bold text-white sm:h-12 sm:w-12">
                                                 {String(day.day || index + 1).padStart(2, "0")}
                                             </div>
                                             <div className="min-w-0 flex-1">
@@ -84,10 +85,10 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                                                             {activityIndex < activities.length - 1 && <span aria-hidden="true" className="absolute left-[calc(min(28%,92px)-1px)] top-5 bottom-0 w-px bg-white/10 sm:left-[calc(min(30%,92px)+0px)]" />}
                                                             <div className="pt-0.5">
                                                                 {activity.time ? (
-                                                                    <span className="inline-flex rounded-md border border-amber-300/15 bg-amber-300/[0.07] px-2 py-1 text-[11px] font-semibold leading-4 text-amber-100 sm:text-xs">{activity.time}</span>
+                                                                    <span className="inline-flex rounded-md border border-white/15 bg-white/[0.06] px-2 py-1 text-[11px] font-semibold leading-4 text-white sm:text-xs">{activity.time}</span>
                                                                 ) : <span className="text-xs text-neutral-600">Anytime</span>}
                                                             </div>
-                                                            <div className="relative min-w-0 pl-4 before:absolute before:left-0 before:top-1.5 before:h-2 before:w-2 before:rounded-full before:bg-amber-300/80">
+                                                            <div className="relative min-w-0 pl-4 before:absolute before:left-0 before:top-1.5 before:h-2 before:w-2 before:rounded-full before:bg-white/80">
                                                                 <p className="break-words text-sm leading-6 text-neutral-200 sm:text-[15px]">{activity.activity || "Activity details to be announced"}</p>
                                                             </div>
                                                         </li>
@@ -95,8 +96,9 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                                                 </ol>
                                             )}
 
-                                            {day.description && (
-                                                <div className={activities.length ? "mt-5 rounded-xl border border-white/[0.07] bg-black/20 p-3.5 sm:p-4" : ""}>
+                                            {hasStructuredActivities && day.description?.trim() && (
+                                                <div className="mt-5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3.5 sm:p-4">
+                                                    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-neutral-500">Additional notes</p>
                                                     <p className="whitespace-pre-line break-words text-sm leading-6 text-neutral-400">{day.description}</p>
                                                 </div>
                                             )}
