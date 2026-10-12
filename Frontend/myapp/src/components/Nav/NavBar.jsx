@@ -36,7 +36,7 @@ function NavBar() {
                 <Link
                     to="/"
                     aria-label="Living the Adventure home"
-                    className="absolute bottom-full left-1/2 mb-3 flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-xl outline-none drop-shadow-[0_2px_8px_rgba(0,0,0,.7)] transition-transform duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-white/80"
+                    className="absolute bottom-full left-1/2 mb-5 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-xl outline-none drop-shadow-[0_2px_8px_rgba(0,0,0,.7)] transition-transform duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-white/80"
                 >
                     <span className="flex h-full w-full items-center justify-center">
                         <Logo />
