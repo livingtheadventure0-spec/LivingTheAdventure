@@ -375,10 +375,7 @@ function EventDetail() {
 
 
                     <div className="
-                        grid
-                        sm:grid-cols-2
-                        lg:grid-cols-3
-                        gap-6
+                        grid items-start sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6
                     ">
 
 
@@ -408,13 +405,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
@@ -463,13 +454,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
@@ -518,13 +503,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
@@ -565,13 +544,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
