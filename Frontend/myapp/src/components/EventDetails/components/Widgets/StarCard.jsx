@@ -5,7 +5,7 @@ function StarCard({ title, value }) {
     const closeButtonRef = useRef(null);
     const titleId = useId();
 
-    const textValue = value == null || value === "" ? "—" : String(value).trim();
+    const textValue = value == null || value === "" ? "—" : String(value).replace(/\\s+/g, " ").trim();
     const words = textValue.split(/\s+/).filter(Boolean).length;
     const isLong = textValue.length > 145 || words > 22;
 
