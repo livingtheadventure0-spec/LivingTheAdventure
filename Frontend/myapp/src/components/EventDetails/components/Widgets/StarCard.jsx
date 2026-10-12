@@ -1,24 +1,47 @@
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 function StarCard({ title, value }) {
     const [showDetails, setShowDetails] = useState(false);
+    const closeButtonRef = useRef(null);
+    const titleId = useId();
+
     const textValue = value == null || value === "" ? "—" : String(value).trim();
-    const isLong = textValue.length > 115 || textValue.split(/\s+/).length > 18;
+    const words = textValue.split(/\s+/).filter(Boolean).length;
+    const isLong = textValue.length > 145 || words > 22;
+
+    useEffect(() => {
+        if (!showDetails) return undefined;
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        closeButtonRef.current?.focus();
+
+        const handleKeyDown = (event) => {
+            if (event.key === "Escape") setShowDetails(false);
+        };
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [showDetails]);
 
     return (
         <>
-            <article className="flex h-full min-h-[156px] min-w-0 flex-col rounded-2xl border border-white/10 bg-neutral-900/70 p-4 text-left transition-colors duration-200 hover:border-white/20 sm:min-h-[168px] sm:p-5 lg:min-h-[176px] lg:p-6">
-                <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-gray-400 sm:text-xs">
+            <article className="flex h-full min-h-[164px] min-w-0 flex-col items-center rounded-2xl border border-white/10 bg-neutral-900/70 p-4 text-center transition-colors duration-200 hover:border-white/20 sm:min-h-[176px] sm:p-5 lg:min-h-[184px] lg:p-6">
+                <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-gray-400 sm:text-sm sm:tracking-widest">
                     {title}
                 </h3>
-                <p className="min-w-0 flex-1 break-words text-sm font-medium leading-6 text-white sm:text-base sm:leading-7 line-clamp-3 [overflow-wrap:anywhere]">
+                <p className="min-w-0 w-full flex-1 break-words text-base font-medium leading-6 text-white sm:text-base sm:leading-7 line-clamp-3 [overflow-wrap:anywhere]">
                     {textValue}
                 </p>
                 {isLong && (
                     <button
                         type="button"
                         onClick={() => setShowDetails(true)}
-                        className="mt-3 w-fit text-xs font-semibold text-amber-300 underline decoration-amber-300/40 underline-offset-4 hover:text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:text-sm"
+                        aria-haspopup="dialog"
+                        className="mt-3 rounded-md px-2 py-1 text-sm font-semibold text-white underline decoration-white/40 underline-offset-4 transition-colors hover:text-gray-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
                         Show more
                     </button>
@@ -27,39 +50,48 @@ function StarCard({ title, value }) {
 
             {showDetails && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm sm:p-6"
-                    onClick={(event) => {
+                    className="fixed inset-0 z-[100] flex items-end justify-center bg-black/65 backdrop-blur-[2px] sm:items-center sm:p-6"
+                    onMouseDown={(event) => {
                         if (event.target === event.currentTarget) setShowDetails(false);
                     }}
                 >
                     <section
                         role="dialog"
                         aria-modal="true"
-                        aria-label={title}
-                        className="my-auto w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-neutral-950 shadow-2xl"
+                        aria-labelledby={titleId}
+                        className="w-full max-w-2xl animate-[slideUp_240ms_ease-out] overflow-hidden rounded-t-3xl border border-white/15 bg-neutral-950 shadow-2xl shadow-black/50 sm:rounded-2xl"
                     >
-                        <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-6">
-                            <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300 sm:text-xs">Event highlight</p>
-                                <h2 className="mt-1 break-words text-lg font-semibold text-white sm:text-xl">{title}</h2>
-                            </div>
+                        <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-white/25 sm:hidden" aria-hidden="true" />
+
+                        <div className="relative border-b border-white/10 px-6 pb-5 pt-5 text-center sm:px-8 sm:pt-7">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-gray-400 sm:text-xs">
+                                Event highlight
+                            </p>
+                            <h2 id={titleId} className="mt-2 break-words text-xl font-semibold text-white sm:text-2xl">
+                                {title}
+                            </h2>
                             <button
+                                ref={closeButtonRef}
                                 type="button"
                                 onClick={() => setShowDetails(false)}
                                 aria-label="Close details"
-                                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-xl text-gray-300 hover:bg-white/10 hover:text-white"
+                                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-xl text-gray-300 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-5 sm:top-5"
                             >
                                 ×
                             </button>
                         </div>
-                        <div className="max-h-[60vh] overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
-                            <p className="whitespace-pre-line break-words text-sm leading-7 text-gray-200 sm:text-base sm:leading-8 [overflow-wrap:anywhere]">{textValue}</p>
+
+                        <div className="max-h-[55vh] overflow-y-auto px-6 py-6 text-center sm:max-h-[60vh] sm:px-8 sm:py-7">
+                            <p className="whitespace-pre-line break-words text-base leading-7 text-gray-200 sm:text-lg sm:leading-8 [overflow-wrap:anywhere]">
+                                {textValue}
+                            </p>
                         </div>
-                        <div className="flex justify-end border-t border-white/10 px-5 py-4 sm:px-6">
+
+                        <div className="border-t border-white/10 px-6 py-4 sm:px-8 sm:py-5">
                             <button
                                 type="button"
                                 onClick={() => setShowDetails(false)}
-                                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black hover:bg-gray-200"
+                                className="w-full rounded-full border border-white/20 bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-gray-200 sm:mx-auto sm:block sm:w-auto sm:min-w-32"
                             >
                                 Close
                             </button>
