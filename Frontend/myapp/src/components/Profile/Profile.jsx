@@ -158,10 +158,10 @@ function Profile() {
     const initials = `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase();
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-white">
+        <div className="min-h-screen w-full min-w-0 max-w-full overflow-x-clip bg-[#0f172a] text-white">
 
             {/* ── Hero Banner ── */}
-            <div className="relative h-56 sm:h-72 overflow-hidden">
+            <div className="relative h-44 xs:h-52 sm:h-72 overflow-hidden">
                 <img
                     src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b"
                     alt="Adventure banner"
@@ -177,14 +177,14 @@ function Profile() {
             </div>
 
             {/* ── Page body ── */}
-            <div className="pl-16 sm:pl-20 pr-4 sm:pr-8 pb-24">
-                <div className="max-w-5xl mx-auto">
+            <div className="w-full min-w-0 max-w-full px-4 sm:px-6 lg:px-8 pb-24">
+                <div className="mx-auto w-full min-w-0 max-w-5xl">
 
                     {/* ── Avatar row ── */}
-                    <div className="flex flex-col sm:flex-row sm:items-end gap-5 -mt-16 relative z-10">
+                    <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5 -mt-12 sm:-mt-16 relative z-10">
 
                         {/* Avatar */}
-                        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-[#1e293b] border-4 border-[#0f172a] shadow-2xl flex items-center justify-center shrink-0">
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-[#1e293b] border-4 border-[#0f172a] shadow-2xl flex items-center justify-center shrink-0">
                             {initials
                                 ? <span className="font-bebas text-4xl sm:text-5xl text-white tracking-wider select-none">{initials}</span>
                                 : <FaUserCircle className="text-6xl text-gray-500" />
@@ -193,7 +193,7 @@ function Profile() {
 
                         {/* Name block */}
                         <div className="flex-1 pb-2 min-w-0">
-                            <h1 className="font-bebas text-3xl sm:text-4xl tracking-wider text-white leading-none">
+                            <h1 className="font-bebas text-2xl sm:text-4xl tracking-wider text-white leading-tight break-words">
                                 {displayName}
                             </h1>
                             <div className="flex items-center gap-2 mt-1.5">
@@ -206,7 +206,7 @@ function Profile() {
                         </div>
 
                         {/* Action buttons */}
-                        <div className="flex items-center gap-3 pb-2 shrink-0">
+                        <div className="flex w-full sm:w-auto flex-wrap items-center gap-3 pb-2 shrink-0">
                             {!editMode ? (
                                 <button
                                     onClick={() => setEditMode(true)}
@@ -261,7 +261,7 @@ function Profile() {
                     )}
 
                     {/* ── Profile Card ── */}
-                    <div className="bg-[#1e293b] rounded-xl border border-gray-800 overflow-hidden mb-8">
+                    <div className="mb-8 w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-800 bg-[#1e293b]">
 
                         {/* Card header */}
                         <div className="px-6 py-4 border-b border-gray-800 flex items-center gap-3">
@@ -269,7 +269,7 @@ function Profile() {
                             <span className="font-semibold text-sm text-gray-200 tracking-wide uppercase">Account Details</span>
                         </div>
 
-                        <div className="p-6 space-y-5">
+                        <div className="min-w-0 space-y-5 p-4 sm:p-6">
 
                             {/* Phone (locked) */}
                             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -368,10 +368,10 @@ function Profile() {
                     {/* ── Tabs Section ── */}
                     <div>
                         {/* Tab Navigation */}
-                        <div className="flex items-center gap-1 border-b border-gray-800 mb-6">
+                        <div className="mb-6 flex w-full min-w-0 max-w-full items-stretch gap-1 overflow-x-auto border-b border-gray-800 overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             <button
                                 onClick={() => setActiveTab("favourites")}
-                                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${activeTab === "favourites"
+                                className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium transition-all duration-200 border-b-2 ${activeTab === "favourites"
                                     ? "border-white text-white"
                                     : "border-transparent text-gray-500 hover:text-gray-300"
                                     }`}
@@ -387,7 +387,7 @@ function Profile() {
 
                             <button
                                 onClick={() => setActiveTab("bookings")}
-                                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${activeTab === "bookings"
+                                className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium transition-all duration-200 border-b-2 ${activeTab === "bookings"
                                     ? "border-white text-white"
                                     : "border-transparent text-gray-500 hover:text-gray-300"
                                     }`}
@@ -403,7 +403,7 @@ function Profile() {
 
                             <button
                                 onClick={() => setActiveTab("previous")}
-                                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all duration-200 border-b-2 ${activeTab === "previous"
+                                className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-3 sm:px-5 py-3 text-xs sm:text-sm font-medium transition-all duration-200 border-b-2 ${activeTab === "previous"
                                     ? "border-white text-white"
                                     : "border-transparent text-gray-500 hover:text-gray-300"
                                     }`}
@@ -414,7 +414,7 @@ function Profile() {
                         </div>
 
                         {/* Tab Content */}
-                        <div className="min-h-[400px]">
+                        <div className="min-h-[400px] w-full min-w-0 max-w-full">
                             {/* Favourites Tab */}
                             {activeTab === "favourites" && (
                                 <FavouritesTab
@@ -477,7 +477,7 @@ function FavouritesTab({ loading, favourites, count }) {
     }
 
     return (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {favourites.map((ev) => (
                 <a
                     key={ev.event_uuid ?? ev.id}

@@ -1,4 +1,11 @@
 {
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "git": {
+        "deploymentEnabled": {
+            "*": false,
+            "main": true
+        }
+    },
     "builds": [
         {
             "src": "api/index.py",

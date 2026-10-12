@@ -39,7 +39,7 @@ const fetchHero = async (heroType) => {
 
     return data.map((item) => ({
         id: item.id,
-        eventId: item.event_id,
+        eventId: item.event_id ?? item.event_uid ?? item.uid,
         title: item.title,
         video: item.video_url,
         thumbnail: item.thumbnail_image_url,

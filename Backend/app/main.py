@@ -28,6 +28,7 @@ app.add_middleware(
         "https://livingtheadventure.in",
         "https://www.livingtheadventure.in",
         "https://admin-portal-livingtheadventure.vercel.app",
+        "https://living-the-adventure-tesk.vercel.app",
     ],
     allow_origin_regex=r"https://([a-z0-9-]+\.)*vercel\.app",
     allow_credentials=True,
