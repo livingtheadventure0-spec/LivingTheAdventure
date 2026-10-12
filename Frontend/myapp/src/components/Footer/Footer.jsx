@@ -50,7 +50,7 @@ const socialLinkClass =
 const Footer = () => {
     return (
         <footer className="relative z-0 w-full min-w-0 border-t border-white/10 bg-black text-gray-400 pl-14 sm:pl-16">
-            <div className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8 lg:py-10">
+            <div className="mx-auto w-[calc(100%-2rem)] max-w-7xl py-7 sm:py-9 lg:py-10">
                 {/* TOP ROW: Brand + Company + Legal + Explore */}
                 <div className="grid grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-3 sm:gap-x-8 lg:grid-cols-12 lg:gap-x-10">
                     {/* Brand */}
