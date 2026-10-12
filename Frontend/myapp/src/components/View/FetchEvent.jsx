@@ -29,7 +29,9 @@ const fetchEventsByType = async (event_type, state = "") => {
         // Used for favourites + stable identifiers across lists/details
         event_uuid: event.event_uuid ?? event.event_id ?? event.id,
         title: event.title,
-        imageUrl: event.cover_image_url,
+        name: event.title,
+        imageUrl: event.poster_vertical_3_url || event.poster_vertical_2_url || event.poster_vertical_1_url || event.vertical_poster_url || event.cover_image_url,
+        hoverImageUrl: event.cover_image_url || event.poster_horizontal_1_url || event.poster_horizontal_2_url || event.poster_horizontal_3_url,
         description: event.short_description,
         category: event.adventure_activity_category,
         difficulty: event.adventure_difficulty_level,
