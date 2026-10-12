@@ -12,7 +12,7 @@ function normalizeItinerary(value) {
     }
 
     return value
-        .split(/[;\\n]+/)
+        .split(/[;\n]+/)
         .map((item) => item.trim())
         .filter(Boolean)
         .map((title, index) => ({ day: index + 1, title, description: "", activities: [] }));
@@ -29,7 +29,7 @@ function normalizeActivities(day) {
 
     // Keep existing saved itineraries readable while older content is migrated.
     return (day.description || "")
-        .split(/\\n+/)
+        .split(/\n+/)
         .map((line) => line.replace(/^\\s*[•*-]\\s*/, "").trim())
         .filter(Boolean)
         .map((line) => {
