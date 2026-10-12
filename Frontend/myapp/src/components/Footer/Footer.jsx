@@ -49,12 +49,10 @@ const socialLinkClass =
 
 const Footer = () => {
     return (
-        <footer className="relative z-0 w-full min-w-0 border-t border-white/10 bg-black text-gray-400">
-            <div className="mx-auto w-full max-w-7xl pl-16 pr-4 py-7 sm:pl-20 sm:pr-6 sm:py-9 lg:px-8 lg:py-10">
-
+        <footer className="relative z-0 w-full min-w-0 border-t border-white/10 bg-black text-gray-400 pl-14 sm:pl-16">
+            <div className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-9 lg:px-8 lg:py-10">
                 {/* TOP ROW: Brand + Company + Legal + Explore */}
                 <div className="grid grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-3 sm:gap-x-8 lg:grid-cols-12 lg:gap-x-10">
-
                     {/* Brand */}
                     <section className="col-span-2 min-w-0 sm:col-span-3 lg:col-span-5">
                         <Link
@@ -98,10 +96,7 @@ const Footer = () => {
                                 aria-label="Chat with us on WhatsApp"
                                 className={socialLinkClass}
                             >
-                                <FaWhatsapp
-                                    aria-hidden="true"
-                                    className="text-base"
-                                />
+                                <FaWhatsapp aria-hidden="true" className="text-base" />
                             </a>
                         </div>
                     </section>
@@ -147,7 +142,6 @@ const Footer = () => {
 
                     {/* Three evenly sized contact cards on desktop */}
                     <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
-
                         {/* Phone */}
                         <a
                             href={`tel:${PHONE_NUMBER}`}
@@ -176,10 +170,7 @@ const Footer = () => {
                             className="group flex min-w-0 items-center gap-3 rounded-lg border border-white/10 p-3 transition-colors hover:border-white/30 hover:bg-white/[0.03]"
                         >
                             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white/10 text-white">
-                                <FaWhatsapp
-                                    aria-hidden="true"
-                                    className="text-base"
-                                />
+                                <FaWhatsapp aria-hidden="true" className="text-base" />
                             </span>
 
                             <span className="min-w-0">
@@ -200,10 +191,7 @@ const Footer = () => {
                             className="group flex min-w-0 items-start gap-3 rounded-lg border border-white/10 p-3 transition-colors hover:border-white/30 hover:bg-white/[0.03] sm:col-span-2 lg:col-span-1"
                         >
                             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white/10 text-white">
-                                <FaLocationDot
-                                    aria-hidden="true"
-                                    className="text-xs"
-                                />
+                                <FaLocationDot aria-hidden="true" className="text-xs" />
                             </span>
 
                             <span className="min-w-0">
@@ -217,10 +205,7 @@ const Footer = () => {
 
                                 <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-medium text-white">
                                     Get directions
-                                    <FaArrowUpRightFromSquare
-                                        aria-hidden="true"
-                                        className="text-[9px]"
-                                    />
+                                    <FaArrowUpRightFromSquare aria-hidden="true" className="text-[9px]" />
                                 </span>
                             </span>
                         </a>
