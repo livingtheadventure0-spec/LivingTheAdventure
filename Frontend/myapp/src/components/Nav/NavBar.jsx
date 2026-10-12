@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import NavLink from "./NavLink";
 import { useAuth } from "../../context/AuthContext";
@@ -25,56 +24,55 @@ const navigation = [
 function NavBar() {
     const { user } = useAuth();
     const location = useLocation();
-    const [expanded, setExpanded] = useState(false);
     const profilePath = user ? "/profile" : "/auth";
-    const isProfileActive = location.pathname === "/profile" || location.pathname === "/auth";
+    const profileActive = location.pathname === "/profile" || location.pathname === "/auth";
 
     return (
         <aside
-            onMouseEnter={() => setExpanded(true)}
-            onMouseLeave={() => setExpanded(false)}
-            onFocus={() => setExpanded(true)}
-            onBlur={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) setExpanded(false);
-            }}
-            className={`fixed left-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col rounded-[1.75rem] border border-white/10 bg-[#090b0f]/90 py-4 text-white shadow-[0_20px_70px_rgba(0,0,0,.55)] backdrop-blur-2xl transition-[width] duration-300 ease-out md:flex ${expanded ? "w-[244px]" : "w-[76px]"}`}
             aria-label="Main navigation"
+            className="fixed left-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col items-center rounded-full border border-white/[.12] bg-[#090b0e]/75 px-2 py-3 shadow-[0_8px_32px_rgba(0,0,0,.24)] backdrop-blur-xl md:flex"
         >
-            <Link to="/" aria-label="Living the Adventure home" className={`mx-auto mb-5 flex h-12 items-center overflow-hidden rounded-2xl transition-all duration-300 ${expanded ? "w-[204px] justify-start gap-3 px-3" : "w-12 justify-center"}`}>
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/5">
+            <Link
+                to="/"
+                aria-label="Living the Adventure home"
+                className="mb-3 flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/[.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+                <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
                     <Logo />
                 </span>
-                {expanded && <span className="min-w-0 text-left"><span className="block text-sm font-bold tracking-wide">LIVING</span><span className="block text-[10px] uppercase tracking-[.22em] text-white/50">the Adventure</span></span>}
             </Link>
 
-            <div className="mx-3 mb-3 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+            <span className="mb-2 h-px w-7 bg-white/15" />
 
-            <nav className="flex flex-col gap-1.5 px-2" aria-label="Explore">
+            <nav className="flex flex-col items-center gap-1" aria-label="Explore">
                 {navigation.map(({ to, label, icon: Icon, end }) => {
-                    const active = end ? location.pathname === "/" : location.pathname === to || location.pathname.startsWith(`${to}/`);
+                    const active = end
+                        ? location.pathname === "/"
+                        : location.pathname === to || location.pathname.startsWith(`${to}/`);
                     return (
-                        <Link key={to} to={to} aria-current={active ? "page" : undefined} className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-                            <NavLink icon={<Icon />} label={label} expanded={expanded} active={active} />
+                        <Link
+                            key={to}
+                            to={to}
+                            aria-label={label}
+                            aria-current={active ? "page" : undefined}
+                            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                        >
+                            <NavLink icon={<Icon />} label={label} active={active} />
                         </Link>
                     );
                 })}
             </nav>
 
-            <div className="mx-3 my-3 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+            <span className="my-2 h-px w-7 bg-white/15" />
 
-            <div className="px-2">
-                <Link to={profilePath} aria-current={isProfileActive ? "page" : undefined} className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-white/70">
-                    <NavLink icon={<FaUserCircle />} label={user ? "Your profile" : "Sign in"} expanded={expanded} active={isProfileActive} />
-                </Link>
-            </div>
-
-            {expanded && (
-                <div className="mx-3 mt-4 rounded-2xl border border-white/[.08] bg-white/[.04] px-3 py-3">
-                    <p className="text-[9px] font-semibold uppercase tracking-[.24em] text-white/35">Find your next</p>
-                    <p className="mt-1 text-xs font-medium text-white/80">great adventure.</p>
-                    <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10"><div className="h-full w-2/3 rounded-full bg-gradient-to-r from-white/40 to-white/90" /></div>
-                </div>
-            )}
+            <Link
+                to={profilePath}
+                aria-label={user ? "Your profile" : "Sign in"}
+                aria-current={profileActive ? "page" : undefined}
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            >
+                <NavLink icon={<FaUserCircle />} label={user ? "Your profile" : "Sign in"} active={profileActive} />
+            </Link>
         </aside>
     );
 }
