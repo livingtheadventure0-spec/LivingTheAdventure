@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import NavLink from "./NavLink";
 import { useAuth } from "../../context/AuthContext";
-import Logo from "../Common/Logo/logo";
 import {
     FaHome,
     FaSuitcaseRolling,
@@ -30,22 +29,10 @@ function NavBar() {
     return (
         <aside
             aria-label="Main navigation"
-            className="fixed left-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col items-center rounded-full border border-white/[.12] bg-[#090b0e]/75 px-2 py-3 shadow-[0_8px_32px_rgba(0,0,0,.24)] backdrop-blur-xl md:flex"
+            className="fixed left-3 top-1/2 z-50 hidden -translate-y-1/2 flex-col items-center rounded-full border border-white/[.13] bg-black/75 px-1.5 py-2.5 shadow-[0_8px_28px_rgba(0,0,0,.22)] backdrop-blur-xl transition-[background-color,border-color,box-shadow] duration-300 hover:border-white/25 hover:bg-black/90 hover:shadow-[0_12px_36px_rgba(0,0,0,.34)] md:flex"
         >
-            <Link
-                to="/"
-                aria-label="Living the Adventure home"
-                className="mb-3 flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-white/[.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-            >
-                <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
-                    <Logo />
-                </span>
-            </Link>
-
-            <span className="mb-2 h-px w-7 bg-white/15" />
-
             <nav className="flex flex-col items-center gap-1" aria-label="Explore">
-                {navigation.map(({ to, label, icon: Icon, end }) => {
+                {navigation.map(({ to, label, icon: Icon, end }, index) => {
                     const active = end
                         ? location.pathname === "/"
                         : location.pathname === to || location.pathname.startsWith(`${to}/`);
@@ -55,7 +42,8 @@ function NavBar() {
                             to={to}
                             aria-label={label}
                             aria-current={active ? "page" : undefined}
-                            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                            style={{ animationDelay: `${index * 35}ms` }}
                         >
                             <NavLink icon={<Icon />} label={label} active={active} />
                         </Link>
@@ -63,13 +51,13 @@ function NavBar() {
                 })}
             </nav>
 
-            <span className="my-2 h-px w-7 bg-white/15" />
+            <span className="my-2 h-px w-6 bg-white/15" />
 
             <Link
                 to={profilePath}
                 aria-label={user ? "Your profile" : "Sign in"}
                 aria-current={profileActive ? "page" : undefined}
-                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             >
                 <NavLink icon={<FaUserCircle />} label={user ? "Your profile" : "Sign in"} active={profileActive} />
             </Link>
