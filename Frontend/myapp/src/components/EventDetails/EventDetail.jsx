@@ -405,13 +405,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
@@ -460,13 +454,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
@@ -515,13 +503,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
@@ -562,13 +544,7 @@ function EventDetail() {
 
                                 <StarCard
                                     title="Duration"
-                                    value={`
-                                        ${event.duration_days}
-                                        day${event.duration_days !== 1 ? "s" : ""}
-                                        •
-                                        ${event.duration_nights}
-                                        night${event.duration_nights !== 1 ? "s" : ""}
-                                    `}
+                                    value={`${event.duration_days} day${Number(event.duration_days) !== 1 ? "s" : ""} • ${event.duration_nights} night${Number(event.duration_nights) !== 1 ? "s" : ""}`}
                                 />
 
 
