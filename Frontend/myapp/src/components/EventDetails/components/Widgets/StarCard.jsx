@@ -2,25 +2,32 @@ import { useEffect, useId, useRef, useState } from "react";
 
 function StarCard({ title, value }) {
     const [showDetails, setShowDetails] = useState(false);
+    const [closing, setClosing] = useState(false);
     const closeButtonRef = useRef(null);
     const titleId = useId();
 
-    const textValue = value == null || value === "" ? "—" : String(value).replace(/\\s+/g, " ").trim();
+    const textValue = value == null || value === "" ? "—" : String(value).replace(/\s+/g, " ").trim();
     const words = textValue.split(/\s+/).filter(Boolean).length;
     const isLong = textValue.length > 145 || words > 22;
 
+    const closeDetails = () => {
+        setClosing(true);
+        window.setTimeout(() => {
+            setShowDetails(false);
+            setClosing(false);
+        }, 240);
+    };
+
     useEffect(() => {
         if (!showDetails) return undefined;
-
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = "hidden";
         closeButtonRef.current?.focus();
 
         const handleKeyDown = (event) => {
-            if (event.key === "Escape") setShowDetails(false);
+            if (event.key === "Escape") closeDetails();
         };
         window.addEventListener("keydown", handleKeyDown);
-
         return () => {
             document.body.style.overflow = previousOverflow;
             window.removeEventListener("keydown", handleKeyDown);
@@ -33,7 +40,7 @@ function StarCard({ title, value }) {
                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-gray-400 sm:text-sm sm:tracking-widest">
                     {title}
                 </h3>
-                <p className="min-w-0 w-full flex-1 break-words text-base font-medium leading-6 text-white sm:text-base sm:leading-7 line-clamp-3 [overflow-wrap:anywhere]">
+                <p className="line-clamp-3 min-w-0 w-full flex-1 break-words text-base font-medium leading-6 text-white sm:leading-7 [overflow-wrap:anywhere]">
                     {textValue}
                 </p>
                 {isLong && (
@@ -50,16 +57,16 @@ function StarCard({ title, value }) {
 
             {showDetails && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-end justify-center bg-black/65 backdrop-blur-[2px] sm:items-center sm:p-6"
+                    className={`fixed inset-0 z-[100] flex items-end justify-center bg-black/65 backdrop-blur-[2px] transition-opacity duration-200 sm:items-end sm:p-6 ${closing ? "opacity-0" : "opacity-100"}`}
                     onMouseDown={(event) => {
-                        if (event.target === event.currentTarget) setShowDetails(false);
+                        if (event.target === event.currentTarget) closeDetails();
                     }}
                 >
                     <section
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby={titleId}
-                        className="w-full max-w-2xl animate-[slideUp_240ms_ease-out] overflow-hidden rounded-t-3xl border border-white/15 bg-neutral-950 shadow-2xl shadow-black/50 sm:rounded-2xl"
+                        className={`w-full max-w-2xl overflow-hidden rounded-t-3xl border border-white/15 bg-neutral-950 shadow-2xl shadow-black/50 transition-transform duration-200 ease-out sm:rounded-2xl ${closing ? "translate-y-full sm:translate-y-8" : "translate-y-0"}`}
                     >
                         <div className="mx-auto mt-3 h-1 w-10 rounded-full bg-white/25 sm:hidden" aria-hidden="true" />
 
@@ -73,7 +80,7 @@ function StarCard({ title, value }) {
                             <button
                                 ref={closeButtonRef}
                                 type="button"
-                                onClick={() => setShowDetails(false)}
+                                onClick={closeDetails}
                                 aria-label="Close details"
                                 className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-xl text-gray-300 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-5 sm:top-5"
                             >
@@ -90,7 +97,7 @@ function StarCard({ title, value }) {
                         <div className="border-t border-white/10 px-6 py-4 sm:px-8 sm:py-5">
                             <button
                                 type="button"
-                                onClick={() => setShowDetails(false)}
+                                onClick={closeDetails}
                                 className="w-full rounded-full border border-white/20 bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-gray-200 sm:mx-auto sm:block sm:w-auto sm:min-w-32"
                             >
                                 Close
