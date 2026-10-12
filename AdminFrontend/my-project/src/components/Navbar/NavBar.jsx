@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-
+import Logo from "../../assets/LTA_2.png";
 /**
  * Shares the "Basecamp" palette introduced on the login page so the whole
  * admin experience feels like one product — independent of the client-facing
@@ -83,14 +83,14 @@ export default function Navbar() {
                 <div className="flex h-16 items-center justify-between">
                     {/* Wordmark */}
                     <Link to="/admin/home" className="flex items-baseline gap-2 shrink-0">
-                        <span className="text-[10px] font-medium tracking-[0.3em] text-[#C9A55C]/80 uppercase hidden sm:inline">
+                        {/* <span className="text-[10px] font-medium tracking-[0.3em] text-[#C9A55C]/80 uppercase hidden sm:inline">
                             Living The
                         </span>
                         <span className="text-xl font-serif text-[#F5F2E9] tracking-wide">
                             Adventure
-                        </span>
+                        </span>*/}
+                        <img src={Logo} alt="Living The Adventure Logo" width={100} height={50} className="hidden sm:block" />
                     </Link>
-
                     {/* Desktop nav */}
                     <nav className="hidden lg:flex items-center gap-1">
                         {NAV_LINKS.map((link) => {

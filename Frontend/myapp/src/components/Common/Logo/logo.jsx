@@ -6,7 +6,7 @@ function Logo() {
             <img
                 src={logo1}
                 alt="Living the Adventure"
-                className="h-12 w-auto max-w-full object-contain sm:h-16 md:h-20 ml-6"
+                className="ml-0 h-8 w-auto max-w-full object-contain sm:ml-4 sm:h-8 md:ml-4 md:h-10 lg:h-10"
             />
         </div>
     );
