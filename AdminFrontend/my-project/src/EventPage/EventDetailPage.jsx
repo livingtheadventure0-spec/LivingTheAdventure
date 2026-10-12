@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import API from "../api";
 import Navbar from "../components/Navbar/NavBar";
 import EventScheduleSection from "../CreateEvent/Eventschedulesection";
+import { downloadEventPdf } from "../utils/eventPdf.js";
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -218,12 +219,22 @@ export default function EventDetailPage() {
                         </svg>
                         Events
                     </Link>
-                    <button
-                        onClick={() => navigate(`/admin/events/${event.event_id}/edit`)}
-                        className="bg-[#1B222C] hover:bg-[#A9782F] text-[#F5F2E9] text-sm font-medium px-5 py-2.5 rounded-sm transition-colors"
-                    >
-                        Edit event
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => downloadEventPdf(event)}
+                            className="inline-flex items-center gap-2 border border-[#1B222C]/25 bg-white px-4 py-2.5 text-sm font-medium text-[#1B222C] transition-colors hover:bg-[#1B222C]/[0.04] rounded-sm"
+                        >
+                            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/></svg>
+                            Download PDF
+                        </button>
+                        <button
+                            onClick={() => navigate(`/admin/events/${event.event_id}/edit`)}
+                            className="bg-[#1B222C] hover:bg-[#A9782F] text-[#F5F2E9] text-sm font-medium px-5 py-2.5 rounded-sm transition-colors"
+                        >
+                            Edit event
+                        </button>
+                    </div>
                 </div>
 
                 {/* Hero */}
