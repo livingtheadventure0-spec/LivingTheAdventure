@@ -30,10 +30,10 @@ function normalizeActivities(day) {
     // Keep existing saved itineraries readable while older content is migrated.
     return (day.description || "")
         .split(/\n+/)
-        .map((line) => line.replace(/^\\s*[•*-]\\s*/, "").trim())
+        .map((line) => line.replace(/^\s*[•*-]\s*/, "").trim())
         .filter(Boolean)
         .map((line) => {
-            const match = line.match(/^(\\d{1,2}(?::\\d{2})?\\s*(?:AM|PM)?):?\\s*(.+)$/i);
+            const match = line.match(/^(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?):?\s*(.+)$/i);
             return match
                 ? { time: match[1].trim(), activity: match[2].trim() }
                 : { time: "", activity: line };
