@@ -19,13 +19,32 @@ const LABEL_SUGGESTIONS = [
     "Peak Expedition",
 ];
 
-const createEmptyItineraryDay = (day = 1) => ({ day, title: "", description: "" });
+const createEmptyActivity = () => ({ time: "", activity: "" });
+const createEmptyItineraryDay = (day = 1) => ({ day, title: "", description: "", activities: [createEmptyActivity()] });
+
+function normalizeActivities(day) {
+    if (Array.isArray(day.activities) && day.activities.length) {
+        return day.activities.map((item) => typeof item === "string"
+            ? { time: "", activity: item }
+            : { time: item.time || "", activity: item.activity || item.description || "" });
+    }
+
+    // Migrate older itinerary descriptions into editable activity rows.
+    const lines = (day.description || "").split(/\n+/).map((line) => line.replace(/^\s*[•*-]\s*/, "").trim()).filter(Boolean);
+    if (!lines.length) return [createEmptyActivity()];
+
+    const parsed = lines.map((line) => {
+        const match = line.match(/^(\d{1,2}(?::\d{2})?\s*(?:AM|PM)?):?\s*(.+)$/i);
+        return match ? { time: match[1].trim(), activity: match[2].trim() } : { time: "", activity: line };
+    });
+    return parsed;
+}
 
 function parseItinerary(value) {
     if (!value || typeof value !== "string") return [createEmptyItineraryDay()];
     try {
         const parsed = JSON.parse(value);
-        if (Array.isArray(parsed)) return parsed.map((item, index) => ({ ...createEmptyItineraryDay(index + 1), ...item, day: index + 1 }));
+        if (Array.isArray(parsed)) return parsed.map((item, index) => { const day = { ...createEmptyItineraryDay(index + 1), ...item, day: index + 1 }; return { ...day, activities: normalizeActivities(day) }; });
     } catch {
         // Preserve older plain-text itinerary content for editing.
     }
@@ -195,7 +214,7 @@ export default function CreateEventPage() {
 
         const payload = {
             ...form,
-            itinerary: JSON.stringify(form.itinerary.map((day, index) => ({ day: index + 1, title: day.title.trim(), description: day.description.trim() })).filter((day) => day.title || day.description)),
+            itinerary: JSON.stringify(form.itinerary.map((day, index) => ({ day: index + 1, title: day.title.trim(), description: (day.description || "").trim(), activities: (day.activities || []).map((item) => ({ time: (item.time || "").trim(), activity: (item.activity || "").trim() })).filter((item) => item.time || item.activity) })).filter((day) => day.title || day.description || day.activities.length)),
             age_requirement: Number(form.age_requirement) || 0,
             duration_days: Number(form.duration_days) || 0,
             duration_nights: Number(form.duration_nights) || 0,
@@ -440,20 +459,54 @@ export default function CreateEventPage() {
                         </Field>
                         <Field label="Trip itinerary" full>
                             <div className="space-y-4">
-                                <p className="text-sm leading-6 text-[#6E6A5E]">Add one card for each day. Add a title and describe the plan for that day. The website will display each day separately.</p>
-                                {form.itinerary.map((day, index) => (
-                                    <div key={index} className="rounded-md border border-[#1B222C]/15 bg-[#F9F7F1] p-4 md:p-5">
-                                        <div className="mb-4 flex items-center justify-between">
-                                            <h4 className="font-medium text-[#1B222C]">Day {index + 1}</h4>
-                                            <button type="button" disabled={form.itinerary.length === 1} onClick={() => setForm((current) => ({ ...current, itinerary: current.itinerary.filter((_, i) => i !== index).map((item, i) => ({ ...item, day: i + 1 })) }))} className="text-xs font-medium text-[#9C4A3C] disabled:opacity-40">Remove day</button>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <input value={day.title} onChange={(event) => setForm((current) => ({ ...current, itinerary: current.itinerary.map((item, i) => i === index ? { ...item, title: event.target.value } : item) }))} placeholder="e.g. Arrival and hotel check-in" className={inputClass} />
-                                            <textarea value={day.description} onChange={(event) => setForm((current) => ({ ...current, itinerary: current.itinerary.map((item, i) => i === index ? { ...item, description: event.target.value } : item) }))} placeholder="Describe activities, meals, travel, and important details for this day..." className={textareaClass} />
-                                        </div>
-                                    </div>
-                                ))}
-                                <button type="button" onClick={() => setForm((current) => ({ ...current, itinerary: [...current.itinerary, createEmptyItineraryDay(current.itinerary.length + 1)] }))} className="w-full rounded-sm border border-dashed border-[#4B5842]/50 px-4 py-3 text-sm font-medium text-[#4B5842] hover:bg-[#4B5842]/5">+ Add another day</button>
+                                <div className="rounded-lg border border-[#4B5842]/15 bg-[#4B5842]/[0.04] p-4">
+                                    <p className="text-sm font-semibold text-[#1B222C]">Build a clear day-by-day schedule</p>
+                                    <p className="mt-1 text-sm leading-6 text-[#6E6A5E]">Give each day a heading, then add as many timed activities as needed. Times are optional for flexible activities.</p>
+                                </div>
+                                {form.itinerary.map((day, index) => {
+                                    const activities = day.activities?.length ? day.activities : [createEmptyActivity()];
+                                    const updateDay = (changes) => setForm((current) => ({ ...current, itinerary: current.itinerary.map((item, i) => i === index ? { ...item, ...changes } : item) }));
+                                    const updateActivity = (activityIndex, changes) => updateDay({ activities: activities.map((item, i) => i === activityIndex ? { ...item, ...changes } : item) });
+                                    return (
+                                        <section key={index} className="overflow-hidden rounded-xl border border-[#1B222C]/12 bg-white shadow-sm">
+                                            <header className="flex items-center justify-between gap-3 border-b border-[#1B222C]/10 bg-[#F9F7F1] px-4 py-3 md:px-5">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#4B5842] text-sm font-semibold text-white">{index + 1}</span>
+                                                    <div><h4 className="font-semibold text-[#1B222C]">Day {index + 1}</h4><p className="text-xs text-[#6E6A5E]">{activities.filter((item) => item.time || item.activity).length} activities</p></div>
+                                                </div>
+                                                <button type="button" disabled={form.itinerary.length === 1} onClick={() => setForm((current) => ({ ...current, itinerary: current.itinerary.filter((_, i) => i !== index).map((item, i) => ({ ...item, day: i + 1 })) }))} className="rounded-md px-2 py-1.5 text-xs font-semibold text-[#9C4A3C] hover:bg-[#9C4A3C]/10 disabled:cursor-not-allowed disabled:opacity-40">Remove day</button>
+                                            </header>
+                                            <div className="space-y-5 p-4 md:p-5">
+                                                <Field label="Day title" full>
+                                                    <input value={day.title} onChange={(event) => updateDay({ title: event.target.value })} placeholder={index === 0 ? "Saturday Night Departure" : "Sunday — Trek and Return"} className={inputClass} />
+                                                </Field>
+                                                <div>
+                                                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                                                        <div><p className="text-sm font-semibold text-[#1B222C]">Schedule & activities</p><p className="text-xs text-[#6E6A5E]">Add one row for each time and activity.</p></div>
+                                                        <button type="button" onClick={() => updateDay({ activities: [...activities, createEmptyActivity()] })} className="rounded-md border border-[#4B5842]/30 px-3 py-2 text-xs font-semibold text-[#4B5842] hover:bg-[#4B5842]/[0.06]">+ Add activity</button>
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        {activities.map((activity, activityIndex) => (
+                                                            <div key={activityIndex} className="grid grid-cols-1 items-start gap-2 rounded-lg border border-[#1B222C]/10 bg-[#FCFBF8] p-3 sm:grid-cols-[minmax(130px,0.32fr)_minmax(0,1fr)_36px]">
+                                                                <Field label="Time">
+                                                                    <input value={activity.time} onChange={(event) => updateActivity(activityIndex, { time: event.target.value })} placeholder="e.g. 05:00 AM" className={inputClass} />
+                                                                </Field>
+                                                                <Field label="Activity">
+                                                                    <input value={activity.activity} onChange={(event) => updateActivity(activityIndex, { activity: event.target.value })} placeholder="e.g. Wake-up call, freshen up and briefing" className={inputClass} />
+                                                                </Field>
+                                                                <button type="button" disabled={activities.length === 1} onClick={() => updateDay({ activities: activities.filter((_, i) => i !== activityIndex) })} aria-label={`Remove activity ${activityIndex + 1}`} className="mt-5 flex h-9 w-9 items-center justify-center rounded-md text-[#9C4A3C] hover:bg-[#9C4A3C]/10 disabled:opacity-30" title="Remove activity">×</button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <Field label="Additional notes (optional)" full>
+                                                    <textarea value={day.description || ""} onChange={(event) => updateDay({ description: event.target.value })} placeholder="Meeting point details, what to carry, meal notes, or other important information..." className={textareaClass} />
+                                                </Field>
+                                            </div>
+                                        </section>
+                                    );
+                                })}
+                                <button type="button" onClick={() => setForm((current) => ({ ...current, itinerary: [...current.itinerary, createEmptyItineraryDay(current.itinerary.length + 1)] }))} className="w-full rounded-lg border border-dashed border-[#4B5842]/45 px-4 py-4 text-sm font-semibold text-[#4B5842] transition-colors hover:bg-[#4B5842]/[0.05]">+ Add another day</button>
                             </div>
                         </Field>
                         <Field full>
