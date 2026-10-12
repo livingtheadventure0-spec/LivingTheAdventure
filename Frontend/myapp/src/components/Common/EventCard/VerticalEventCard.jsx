@@ -94,10 +94,10 @@ function VerticalEventCard({ item, isFavourite, onToggleFavourite }) {
                         {/* Hover Content (desktop only) */}
                         {isHovered && !isLoading && (
                             <div className="absolute inset-0 hidden lg:flex flex-col justify-end p-3 z-20">
-                                {details?.cover_image_url && (
+                                {(details?.cover_image_url || item.hoverImageUrl) && (
                                     <div className="mb-2 rounded-lg overflow-hidden border border-white/20">
                                         <img
-                                            src={details.cover_image_url}
+                                            src={details?.cover_image_url || item.hoverImageUrl}
                                             alt={details.title}
                                             className="w-full h-20 object-cover"
                                         />
