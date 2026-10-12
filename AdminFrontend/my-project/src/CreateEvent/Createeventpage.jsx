@@ -30,7 +30,7 @@ function normalizeActivities(day) {
     }
 
     // Migrate older itinerary descriptions into editable activity rows.
-    const lines = (day.description || "").split(/\\n+/).map((line) => line.replace(/^\\s*[•*-]\\s*/, "").trim()).filter(Boolean);
+    const lines = (day.description || "").split(/\n+/).map((line) => line.replace(/^\\s*[•*-]\\s*/, "").trim()).filter(Boolean);
     if (!lines.length) return [createEmptyActivity()];
 
     const parsed = lines.map((line) => {
