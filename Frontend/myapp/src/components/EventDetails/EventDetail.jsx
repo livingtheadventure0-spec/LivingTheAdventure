@@ -7,6 +7,7 @@ import Hero from "./components/Hero/Hero.jsx";
 import StarCard from "./components/Widgets/StarCard.jsx";
 import Itinerary from "./components/Widgets/ItineraryFlow.jsx";
 import InclusionsExclusions from "./components/Widgets/InclusionsExclusions.jsx";
+import { downloadEventPdf } from "../../utils/eventPdf.js";
 import Policy from "./components/Widgets/Policy.jsx";
 
 import fetchEventByID from "./components/FetchEventByID.jsx";
@@ -784,13 +785,24 @@ function EventDetail() {
                             </p>
                             <p className="mt-1 hidden text-sm text-neutral-400 sm:block">Explore the schedule and booking details.</p>
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => document.getElementById("event-booking-section")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                            className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:min-w-40 sm:px-8"
-                        >
-                            Book Now
-                        </button>
+                        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                            <button
+                                type="button"
+                                onClick={() => downloadEventPdf(event, eventSchedule)}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-transparent px-3 py-3 text-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:px-5 sm:text-sm"
+                                aria-label="Download event details as PDF"
+                            >
+                                <span className="hidden sm:inline">Download PDF</span>
+                                <span className="sm:hidden">PDF</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById("event-booking-section")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                                className="shrink-0 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-colors hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:min-w-40 sm:px-8"
+                            >
+                                Book Now
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
