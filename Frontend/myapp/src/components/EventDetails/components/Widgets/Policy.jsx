@@ -1,4 +1,4 @@
-import { FiBackpack, FiShield, FiXCircle } from "react-icons/fi";
+import { FiPackage, FiShield, FiXCircle } from "react-icons/fi";
 
 function PolicySection({ title, icon: Icon, children }) {
     if (!children || (typeof children === "string" && !children.trim())) return null;
