@@ -49,7 +49,7 @@ function NavBar() {
                 onBlur={(event) => {
                     if (!event.currentTarget.contains(event.relatedTarget)) setExpanded(false);
                 }}
-                className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[.08] bg-[#090a0c]/95 py-5 text-white shadow-[8px_0_24px_rgba(0,0,0,.18)] backdrop-blur-xl transition-[width,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] md:flex ${expanded ? "w-60 shadow-[12px_0_32px_rgba(0,0,0,.24)]" : "w-[76px]"}`
+                className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[.08] bg-[#090a0c]/95 py-5 text-white shadow-[8px_0_24px_rgba(0,0,0,.18)] backdrop-blur-xl transition-[width,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] md:flex ${expanded ? "w-60 shadow-[12px_0_32px_rgba(0,0,0,.24)]" : "w-[76px]"}`}`
             >
                 <Link
                     to="/"
