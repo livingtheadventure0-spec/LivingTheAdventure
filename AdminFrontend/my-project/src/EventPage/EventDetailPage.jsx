@@ -392,6 +392,13 @@ export default function EventDetailPage() {
                     </Field>
                 </Section>
 
+                {/* Things to carry */}
+                <Section title="Things to Carry" description="What participants should bring for this event.">
+                    <Field label="Things to carry" full>
+                        <Prose>{event.things_to_carry_text}</Prose>
+                    </Field>
+                </Section>
+
                 {/* Policies */}
                 <Section title="Policies">
                     <Field label="Safety guidelines" full>
