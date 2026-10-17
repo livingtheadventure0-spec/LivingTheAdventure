@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import NavLink from './NavLink';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../Common/Logo/logo';
@@ -16,20 +15,9 @@ function NavBar() {
 
     const { user } = useAuth();   // ✅ move hook inside component
 
-    const [showOverlay, setShowOverlay] = useState(false);
 
     return (
         <>
-            {/* Overlay */}
-            <div
-                className={`
-                    fixed inset-0 z-10
-                    pointer-events-none
-                    transition-opacity duration-300
-                    ${showOverlay ? 'opacity-60 bg-black' : 'opacity-0'}
-                `}
-            />
-
             {/* Sidebar */}
             <div
                 className="
@@ -50,7 +38,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaHome className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Home"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
@@ -58,7 +45,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaSuitcaseRolling className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Trips"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
