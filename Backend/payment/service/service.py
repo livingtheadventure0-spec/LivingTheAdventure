@@ -9,7 +9,7 @@ from payment.model.Booking import Booking
 from payment.model.Payment import Payment
 from sqlalchemy.sql import func
 
-from payment.razorpay_client import razorpay_client, RAZORPAY_KEY_ID
+from payment.razorpay_client import get_razorpay_client, get_razorpay_key_id
 
 from payment.utils.utils import (
     find_pickup,
@@ -54,6 +54,8 @@ def create_payment_order(
     db: Session,
 ):
     user = get_current_user(decoded, db)
+    razorpay_client = get_razorpay_client()
+    razorpay_key_id = get_razorpay_key_id()
 
     # ---------------------------------------------------------
     # 1. Find Event
@@ -264,7 +266,7 @@ def create_payment_order(
     return {
         "booking_id": booking.booking_id,
         "razorpay_order_id": razorpay_order["id"],
-        "razorpay_key": RAZORPAY_KEY_ID,
+        "razorpay_key": razorpay_key_id,
         "amount": amount_in_paise,
         "currency": "INR",
         "number_of_people": booking.number_of_people,
@@ -278,6 +280,7 @@ def verify_payment(
     db: Session,
 ):
     user = get_current_user(decoded, db)
+    razorpay_client = get_razorpay_client()
 
     # ---------------------------------------------------------
     # 1. Find booking owned by current user
