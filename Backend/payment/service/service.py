@@ -340,12 +340,6 @@ def verify_payment(
     # 5. Verify Razorpay signature
     # ---------------------------------------------------------
 
-    verification_data = {
-        "razorpay_order_id": payload.razorpay_order_id,
-        "razorpay_payment_id": payload.razorpay_payment_id,
-        "razorpay_signature": payload.razorpay_signature,
-    }
-
     try:
         # Use the order ID stored on the server, not a client-supplied
         # order ID, as the trusted value for signature verification.
