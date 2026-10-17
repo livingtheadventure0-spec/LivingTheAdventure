@@ -7,6 +7,7 @@ import Hero from "./components/Hero/Hero.jsx";
 import StarCard from "./components/Widgets/StarCard.jsx";
 import Itinerary from "./components/Widgets/ItineraryFlow.jsx";
 import InclusionsExclusions from "./components/Widgets/InclusionsExclusions.jsx";
+import Policy from "./components/Widgets/Policy.jsx";
 
 import fetchEventByID from "./components/FetchEventByID.jsx";
 import fetchScheduleByID from "./components/FetchScheduleByID.jsx";
@@ -611,6 +612,8 @@ function EventDetail() {
             <InclusionsExclusions
                 event={event}
             />
+
+            <Policy event={event} />
 
 
             {/* ================================================= */}
