@@ -38,7 +38,7 @@ function NavBar() {
             {/* Desktop hover scrim: softens the page while the navigation is expanded. */}
             <div
                 aria-hidden="true"
-                className={`pointer-events-none fixed inset-0 z-30 hidden bg-black/45 transition-opacity duration-300 ease-out md:block ${expanded ? "opacity-100" : "opacity-0"}`}
+                className="pointer-events-none fixed inset-0 z-30 hidden bg-transparent md:block"
             />
 
             <aside
@@ -49,7 +49,7 @@ function NavBar() {
                 onBlur={(event) => {
                     if (!event.currentTarget.contains(event.relatedTarget)) setExpanded(false);
                 }}
-                className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[.07] bg-gradient-to-b from-[#121316]/95 via-[#08090b]/90 to-black/95 py-5 text-white shadow-[12px_0_40px_rgba(0,0,0,.12)] backdrop-blur-2xl transition-[width,background-color,border-color] duration-300 ease-[cubic-bezier(.22,1,.36,1)] md:flex ${expanded ? "w-60 border-white/[.12]" : "w-[76px]"}`}
+                className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[.08] bg-[#090a0c]/95 py-5 text-white shadow-[8px_0_24px_rgba(0,0,0,.18)] backdrop-blur-xl transition-[width,box-shadow] duration-300 ease-[cubic-bezier(.22,1,.36,1)] md:flex ${expanded ? "w-60 shadow-[12px_0_32px_rgba(0,0,0,.24)]" : "w-[76px]"}`
             >
                 <Link
                     to="/"
