@@ -158,7 +158,7 @@ function Profile() {
     const initials = `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase();
 
     return (
-        <div className="min-h-screen w-full min-w-0 max-w-full overflow-x-clip bg-[#0f172a] text-white">
+        <div className="min-h-screen w-full min-w-0 max-w-full overflow-x-clip bg-black text-white">
 
             {/* ── Hero Banner ── */}
             <div className="relative h-44 xs:h-52 sm:h-72 overflow-hidden">
@@ -168,7 +168,7 @@ function Profile() {
                     className="w-full h-full object-cover"
                     style={{ filter: "brightness(0.38)" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0f172a]/30 to-[#0f172a]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-[#0f172a]" />
                 <div className="absolute top-6 right-8 hidden sm:flex items-center gap-2">
                     <span className="font-bebas text-2xl tracking-widest text-white/60 uppercase">
                         My Profile
@@ -184,7 +184,7 @@ function Profile() {
                     <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5 -mt-12 sm:-mt-16 relative z-10">
 
                         {/* Avatar */}
-                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-[#1e293b] border-4 border-[#0f172a] shadow-2xl flex items-center justify-center shrink-0">
+                        <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-[#111111] border-4 border-black shadow-2xl flex items-center justify-center shrink-0">
                             {initials
                                 ? <span className="font-bebas text-4xl sm:text-5xl text-white tracking-wider select-none">{initials}</span>
                                 : <FaUserCircle className="text-6xl text-gray-500" />
@@ -261,7 +261,7 @@ function Profile() {
                     )}
 
                     {/* ── Profile Card ── */}
-                    <div className="mb-8 w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-800 bg-[#1e293b]">
+                    <div className="mb-8 w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-800 bg-[#111111]">
 
                         {/* Card header */}
                         <div className="px-6 py-4 border-b border-gray-800 flex items-center gap-3">
@@ -281,7 +281,7 @@ function Profile() {
                                         type="text"
                                         value={user.phoneNumber || "—"}
                                         disabled
-                                        className="flex-1 bg-[#020617]/50 border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
+                                        className="flex-1 bg-[#080808] border border-gray-800 rounded-lg px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
                                     />
                                     <span className="text-xs text-gray-700 border border-gray-800 rounded px-2 py-1">locked</span>
                                 </div>
@@ -299,7 +299,7 @@ function Profile() {
                                             value={profile.first_name}
                                             onChange={handleChange}
                                             placeholder="Enter your first name"
-                                            className="w-full bg-[#020617] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-gray-500 transition-colors"
+                                            className="w-full bg-[#080808] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-gray-500 transition-colors"
                                         />
                                     ) : (
                                         <div className="px-4 py-2.5 text-sm text-gray-200">
@@ -321,7 +321,7 @@ function Profile() {
                                             value={profile.last_name}
                                             onChange={handleChange}
                                             placeholder="Enter your last name"
-                                            className="w-full bg-[#020617] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-gray-500 transition-colors"
+                                            className="w-full bg-[#080808] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-gray-500 transition-colors"
                                         />
                                     ) : (
                                         <div className="px-4 py-2.5 text-sm text-gray-200">
@@ -345,7 +345,7 @@ function Profile() {
                                                 value={profile.email}
                                                 onChange={handleChange}
                                                 placeholder="your.email@example.com"
-                                                className="w-full bg-[#020617] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-gray-500 transition-colors"
+                                                className="w-full bg-[#080808] border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-gray-500 transition-colors"
                                             />
                                             <div className="mt-3 flex items-start gap-2 p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
                                                 <FaEnvelope className="text-blue-400 text-xs mt-0.5 shrink-0" />
@@ -462,7 +462,7 @@ function FavouritesTab({ loading, favourites, count }) {
 
     if (count === 0) {
         return (
-            <div className="bg-[#1e293b] rounded-xl border border-gray-800 py-20 px-6 text-center">
+            <div className="bg-[#111111] rounded-xl border border-gray-800 py-20 px-6 text-center">
                 <FaHeart className="mx-auto text-4xl text-gray-700 mb-4" />
                 <p className="text-gray-400 text-base font-medium">No favourites yet</p>
                 <p className="text-gray-600 text-sm mt-2">Explore adventures and save the ones you love</p>
@@ -482,10 +482,10 @@ function FavouritesTab({ loading, favourites, count }) {
                 <a
                     key={ev.event_uuid ?? ev.id}
                     href={`/eventDetails/${ev.id}`}
-                    className="group bg-[#1e293b] rounded-xl border border-gray-800 hover:border-gray-700 transition-all duration-300 block overflow-hidden"
+                    className="group bg-[#111111] rounded-xl border border-gray-800 hover:border-gray-700 transition-all duration-300 block overflow-hidden"
                 >
                     {/* Cover image */}
-                    <div className="aspect-[16/9] overflow-hidden bg-[#020617] relative">
+                    <div className="aspect-[16/9] overflow-hidden bg-[#080808] relative">
                         <img
                             src={ev.cover_image_url}
                             alt={ev.title}
@@ -527,7 +527,7 @@ function CurrentBookingsTab({ loading, bookings }) {
 
     // TODO: Replace with actual booking data
     return (
-        <div className="bg-[#1e293b] rounded-xl border border-gray-800 py-20 px-6 text-center">
+        <div className="bg-[#111111] rounded-xl border border-gray-800 py-20 px-6 text-center">
             <FaCalendarAlt className="mx-auto text-4xl text-gray-700 mb-4" />
             <p className="text-gray-400 text-base font-medium">No current bookings</p>
             <p className="text-gray-600 text-sm mt-2">Book an adventure to see it here</p>
@@ -553,7 +553,7 @@ function PreviousEventsTab({ loading, events }) {
 
     // TODO: Replace with actual previous events data
     return (
-        <div className="bg-[#1e293b] rounded-xl border border-gray-800 py-20 px-6 text-center">
+        <div className="bg-[#111111] rounded-xl border border-gray-800 py-20 px-6 text-center">
             <FaHistory className="mx-auto text-4xl text-gray-700 mb-4" />
             <p className="text-gray-400 text-base font-medium">No previous events</p>
             <p className="text-gray-600 text-sm mt-2">Your completed adventures will appear here</p>
