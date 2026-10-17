@@ -43,6 +43,7 @@ class Event(Base):
 
     safety_guidelines_text = Column(Text, nullable=True)
     cancellation_policy_text = Column(Text, nullable=True)
+    things_to_carry_text = Column(Text, nullable=True)
 
     seo_tags = Column(ARRAY(String), nullable=True)
     seo_title = Column(String, nullable=True)

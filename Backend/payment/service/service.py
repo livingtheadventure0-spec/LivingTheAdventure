@@ -9,7 +9,7 @@ from payment.model.Booking import Booking
 from payment.model.Payment import Payment
 from sqlalchemy.sql import func
 
-from payment.razorpay_client import razorpay_client, RAZORPAY_KEY_ID
+from payment.razorpay_client import get_razorpay_client, get_razorpay_key_id
 
 from payment.utils.utils import (
     find_pickup,
@@ -54,6 +54,8 @@ def create_payment_order(
     db: Session,
 ):
     user = get_current_user(decoded, db)
+    razorpay_client = get_razorpay_client()
+    razorpay_key_id = get_razorpay_key_id()
 
     # ---------------------------------------------------------
     # 1. Find Event
@@ -197,12 +199,12 @@ def create_payment_order(
 
     amount_in_paise = int(round(final_amount * 100))
 
-    if amount_in_paise <= 0:
+    if amount_in_paise < 100:
         db.rollback()
 
         raise HTTPException(
             status_code=400,
-            detail="Invalid payment amount.",
+            detail="Payment amount must be at least ₹1.00.",
         )
 
     try:
@@ -264,7 +266,7 @@ def create_payment_order(
     return {
         "booking_id": booking.booking_id,
         "razorpay_order_id": razorpay_order["id"],
-        "razorpay_key": RAZORPAY_KEY_ID,
+        "razorpay_key": razorpay_key_id,
         "amount": amount_in_paise,
         "currency": "INR",
         "number_of_people": booking.number_of_people,
@@ -278,6 +280,7 @@ def verify_payment(
     db: Session,
 ):
     user = get_current_user(decoded, db)
+    razorpay_client = get_razorpay_client()
 
     # ---------------------------------------------------------
     # 1. Find booking owned by current user
@@ -344,33 +347,66 @@ def verify_payment(
     }
 
     try:
-
-        razorpay_client.utility.verify_payment_signature(verification_data)
+        # Use the order ID stored on the server, not a client-supplied
+        # order ID, as the trusted value for signature verification.
+        razorpay_client.utility.verify_payment_signature(
+            {
+                "razorpay_order_id": payment.razorpay_order_id,
+                "razorpay_payment_id": payload.razorpay_payment_id,
+                "razorpay_signature": payload.razorpay_signature,
+            }
+        )
 
     except Exception as exc:
-
         payment.payment_status = "FAILED"
-
         db.commit()
 
         raise HTTPException(
             status_code=400,
-            detail="Payment verification failed.",
+            detail="Payment signature verification failed.",
         ) from exc
 
     # ---------------------------------------------------------
-    # 6. Payment successful
+    # 6. Confirm Razorpay's payment status and amount
+    # ---------------------------------------------------------
+
+    try:
+        razorpay_payment = razorpay_client.payment.fetch(
+            payload.razorpay_payment_id
+        )
+    except Exception as exc:
+        # Do not mark a payment as failed or successful when Razorpay's
+        # status cannot be checked. The user can retry verification.
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to confirm payment status with Razorpay. Please retry.",
+        ) from exc
+
+    expected_amount_paise = int(round(float(booking.final_amount) * 100))
+
+    if (
+        razorpay_payment.get("order_id") != payment.razorpay_order_id
+        or int(razorpay_payment.get("amount", -1)) != expected_amount_paise
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Razorpay payment does not match this booking amount or order.",
+        )
+
+    if razorpay_payment.get("status") != "captured":
+        raise HTTPException(
+            status_code=409,
+            detail="Payment is not captured yet. Booking remains pending until payment is captured.",
+        )
+
+    # ---------------------------------------------------------
+    # 7. Payment successful
     # ---------------------------------------------------------
 
     payment.razorpay_payment_id = payload.razorpay_payment_id
-
     payment.razorpay_signature = payload.razorpay_signature
-
     payment.payment_status = "SUCCESS"
-
-    # We know this payment belongs to this booking.
-    payment.amount_paid = booking.final_amount
-
+    payment.amount_paid = expected_amount_paise / 100
     payment.paid_at = func.now()
 
     # ---------------------------------------------------------
