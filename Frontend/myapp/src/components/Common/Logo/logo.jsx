@@ -1,4 +1,4 @@
-import logo1 from '../../../assets/LTA_2.png';
+import logo1 from '../../../assets/livinglogowhite.png';
 
 function Logo() {
     return (
@@ -6,7 +6,7 @@ function Logo() {
             <img
                 src={logo1}
                 alt="Living the Adventure"
-                className="ml-0 h-8 w-auto max-w-full object-contain sm:ml-4 sm:h-8 md:ml-4 md:h-10 lg:h-10"
+                className="h-14 w-14 max-w-full scale-110 object-contain"
             />
         </div>
     );
