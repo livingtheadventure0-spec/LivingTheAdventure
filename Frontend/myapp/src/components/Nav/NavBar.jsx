@@ -23,8 +23,8 @@ function NavBar() {
             <div
                 aria-hidden="true"
                 className="
-                    pointer-events-none absolute inset-y-0 left-0 -z-10 w-[290px]
-                    bg-gradient-to-r from-black/90 via-black/65 to-transparent
+                    pointer-events-none absolute inset-y-0 left-0 -z-10 w-[360px]
+                    bg-gradient-to-r from-black/90 via-black/65 via-[55%] to-transparent
                     opacity-0 transition-opacity duration-500 ease-out
                     group-hover/sidebar:opacity-100 group-focus-within/sidebar:opacity-100
                     motion-reduce:transition-none
