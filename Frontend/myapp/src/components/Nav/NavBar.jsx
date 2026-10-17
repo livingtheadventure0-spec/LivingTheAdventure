@@ -15,7 +15,6 @@ function NavBar() {
 
     const { user } = useAuth();   // ✅ move hook inside component
 
-
     return (
         <>
             {/* Sidebar */}
@@ -52,7 +51,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaHiking className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Treks"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
@@ -60,7 +58,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaCampground className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Adventure Activity"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
@@ -68,7 +65,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaMountain className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Peak Expedition"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
@@ -76,7 +72,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaTree className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Park Development and Design"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
@@ -85,7 +80,6 @@ function NavBar() {
                     <NavLink
                         icon={<FaUserCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
                         label="Profile"
-                        onHover={setShowOverlay}
                     />
                 </a>
 
