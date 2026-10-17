@@ -31,8 +31,8 @@ function NavBar() {
                 "
             />
 
-            <div className="relative mb-8 flex h-14 w-full shrink-0 items-center justify-center">
-                <div className="h-10 w-10 shrink-0">
+            <div className="relative mb-6 flex h-16 w-full shrink-0 items-center justify-center">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center">
                     <Logo />
                 </div>
             </div>
