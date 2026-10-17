@@ -168,7 +168,8 @@ function Profile() {
                     className="w-full h-full object-cover"
                     style={{ filter: "brightness(0.38)" }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-[#0f172a]" />
+                <div className="absolute inset-0 bg-black/25" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black" />
                 <div className="absolute top-6 right-8 hidden sm:flex items-center gap-2">
                     <span className="font-bebas text-2xl tracking-widest text-white/60 uppercase">
                         My Profile
