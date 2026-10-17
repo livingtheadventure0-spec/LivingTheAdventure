@@ -38,6 +38,7 @@ class EventBase(BaseModel):
 
     safety_guidelines_text: Optional[str] = None
     cancellation_policy_text: Optional[str] = None
+    things_to_carry_text: Optional[str] = None
 
     seo_tags: Optional[List[str]] = None
     seo_title: Optional[str] = None
@@ -79,6 +80,7 @@ class EventUpdate(BaseModel):
     excluded_services: Optional[List[str]] = None
     safety_guidelines_text: Optional[str] = None
     cancellation_policy_text: Optional[str] = None
+    things_to_carry_text: Optional[str] = None
     seo_tags: Optional[List[str]] = None
     seo_title: Optional[str] = None
     seo_description: Optional[str] = None
