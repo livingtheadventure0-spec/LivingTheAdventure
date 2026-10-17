@@ -1,4 +1,4 @@
-import logo1 from '../../../assets/LTA_2.png';
+import logo1 from '../../../assets/livinglogowhite.png';
 
 function Logo() {
     return (
