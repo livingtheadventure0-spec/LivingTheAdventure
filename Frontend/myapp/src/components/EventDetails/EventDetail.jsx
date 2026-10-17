@@ -662,10 +662,10 @@ function EventDetail() {
                                         <span className="text-lg font-bold">!</span>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-white">Booking update</h3>
+                                        <h3 className="font-semibold text-white">Secure online booking</h3>
                                         <p className="mt-1 text-sm leading-6 text-neutral-300">
-                                            Online payments are not available yet. Interested in joining this adventure?
-                                            Tap <strong>I’m interested</strong> and our team will contact you to help with the next steps.
+                                            Select your pickup point and participants below, then complete payment securely through Razorpay.
+                                            Your booking is confirmed only after the backend verifies the payment and its captured status.
                                         </p>
                                     </div>
                                 </div>
