@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import NavLink from './NavLink';
-import { useAuth } from '../../context/AuthContext';
-import Logo from '../Common/Logo/logo';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import Logo from "../Common/Logo/logo";
+import NavLink from "./NavLink";
 import {
     FaHome,
     FaSuitcaseRolling,
@@ -9,101 +10,124 @@ import {
     FaCampground,
     FaMountain,
     FaTree,
-    FaUserCircle
-} from 'react-icons/fa';
+    FaUserCircle,
+} from "react-icons/fa";
+
+const navigation = [
+    { to: "/", label: "Home", mobileLabel: "Home", icon: FaHome, end: true },
+    { to: "/trips", label: "Trips", mobileLabel: "Trips", icon: FaSuitcaseRolling },
+    { to: "/treks", label: "Treks", mobileLabel: "Treks", icon: FaHiking },
+    { to: "/adventure-activity", label: "Adventure Activity", mobileLabel: "Adventure", icon: FaCampground },
+    { to: "/peak-expedition", label: "Peak Expedition", mobileLabel: "Peaks", icon: FaMountain },
+    { to: "/park-development-design", label: "Park Development", mobileLabel: "Parks", icon: FaTree },
+];
 
 function NavBar() {
+    const { user } = useAuth();
+    const location = useLocation();
+    const [expanded, setExpanded] = useState(false);
+    const profilePath = user ? "/profile" : "/auth";
+    const profileActive = location.pathname === "/profile" || location.pathname === "/auth";
 
-    const { user } = useAuth();   // ✅ move hook inside component
-
-    const [showOverlay, setShowOverlay] = useState(false);
+    const isActive = (to, end) => end
+        ? location.pathname === "/"
+        : location.pathname === to || location.pathname.startsWith(`${to}/`);
 
     return (
         <>
-            {/* Overlay */}
+            {/* Desktop hover scrim: softens the page while the navigation is expanded. */}
             <div
-                className={`
-                    fixed inset-0 z-10
-                    pointer-events-none
-                    transition-opacity duration-300
-                    ${showOverlay ? 'opacity-60 bg-black' : 'opacity-0'}
-                `}
+                aria-hidden="true"
+                className={`pointer-events-none fixed inset-0 z-30 hidden bg-black/45 transition-opacity duration-300 ease-out md:block ${expanded ? "opacity-100" : "opacity-0"}`}
             />
 
-            {/* Sidebar */}
-            <div
-                className="
-                fixed top-0 left-0 z-20
-                h-full
-                w-14 sm:w-16
-                flex flex-col justify-center items-center
-                py-3 sm:py-4
-                space-y-1.5 sm:space-y-2
-                bg-transparent
-                "
+            <aside
+                aria-label="Main navigation"
+                onMouseEnter={() => setExpanded(true)}
+                onMouseLeave={() => setExpanded(false)}
+                onFocus={() => setExpanded(true)}
+                onBlur={(event) => {
+                    if (!event.currentTarget.contains(event.relatedTarget)) setExpanded(false);
+                }}
+                className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[.07] bg-gradient-to-b from-[#121316]/95 via-[#08090b]/90 to-black/95 py-5 text-white shadow-[12px_0_40px_rgba(0,0,0,.12)] backdrop-blur-2xl transition-[width,background-color,border-color] duration-300 ease-[cubic-bezier(.22,1,.36,1)] md:flex ${expanded ? "w-60 border-white/[.12]" : "w-[76px]"}`}
             >
-                <div className="absolute top-8 flex items-center justify-center w-28 h-28">
-                    <Logo />
+                <Link
+                    to="/"
+                    aria-label="Living the Adventure home"
+                    className={`mb-8 flex h-12 shrink-0 items-center overflow-hidden rounded-xl transition-[padding,margin] duration-300 ${expanded ? "mx-4 gap-3 px-2" : "mx-auto w-12 justify-center"}`}
+                >
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                        <Logo />
+                    </span>
+                    <span className={`overflow-hidden whitespace-nowrap transition-[opacity,transform,max-width] duration-200 ${expanded ? "max-w-40 translate-x-0 opacity-100" : "max-w-0 -translate-x-2 opacity-0"}`}>
+                        <span className="block text-[13px] font-bold tracking-[.16em]">LIVING</span>
+                        <span className="block text-[9px] font-medium uppercase tracking-[.22em] text-white/45">the Adventure</span>
+                    </span>
+                </Link>
+
+                <div className="mx-4 mb-4 h-px bg-gradient-to-r from-white/15 to-transparent" />
+
+                <nav className="flex flex-1 flex-col gap-1 px-2" aria-label="Explore">
+                    {navigation.map(({ to, label, icon: Icon, end }, index) => (
+                        <Link
+                            key={to}
+                            to={to}
+                            aria-label={label}
+                            aria-current={isActive(to, end) ? "page" : undefined}
+                            className="rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                            style={{ transitionDelay: expanded ? `${index * 12}ms` : "0ms" }}
+                        >
+                            <NavLink icon={<Icon />} label={label} active={isActive(to, end)} expanded={expanded} />
+                        </Link>
+                    ))}
+                </nav>
+
+                <div className="mx-4 mb-3 h-px bg-gradient-to-r from-white/15 to-transparent" />
+
+                <div className="px-2">
+                    <Link
+                        to={profilePath}
+                        aria-label={user ? "Your profile" : "Sign in"}
+                        aria-current={profileActive ? "page" : undefined}
+                        className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    >
+                        <NavLink icon={<FaUserCircle />} label={user ? "Your profile" : "Sign in"} active={profileActive} expanded={expanded} />
+                    </Link>
                 </div>
+            </aside>
 
-                <a href="/">
-                    <NavLink
-                        icon={<FaHome className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Home"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-                <a href="/trips">
-                    <NavLink
-                        icon={<FaSuitcaseRolling className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Trips"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-                <a href="/treks">
-                    <NavLink
-                        icon={<FaHiking className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Treks"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-                <a href="/adventure-activity">
-                    <NavLink
-                        icon={<FaCampground className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Adventure Activity"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-                <a href="/peak-expedition">
-                    <NavLink
-                        icon={<FaMountain className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Peak Expedition"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-                <a href="/park-development-design">
-                    <NavLink
-                        icon={<FaTree className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Park Development and Design"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-                {/* Profile link */}
-                <a href={user ? "/profile" : "/auth"}>
-                    <NavLink
-                        icon={<FaUserCircle className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />}
-                        label="Profile"
-                        onHover={setShowOverlay}
-                    />
-                </a>
-
-            </div>
+            {/* Compact, touch-friendly navigation for phones and small tablets. */}
+            <nav
+                aria-label="Mobile navigation"
+                className="fixed inset-x-0 bottom-0 z-50 flex items-stretch gap-1 overflow-x-auto border-t border-white/10 bg-[#090a0c]/95 px-2 pb-[max(env(safe-area-inset-bottom),8px)] pt-2 text-white shadow-[0_-8px_30px_rgba(0,0,0,.28)] backdrop-blur-2xl md:hidden"
+            >
+                {navigation.map(({ to, label, mobileLabel, icon: Icon, end }) => {
+                    const active = isActive(to, end);
+                    return (
+                        <Link
+                            key={to}
+                            to={to}
+                            aria-label={label}
+                            aria-current={active ? "page" : undefined}
+                            className="flex min-w-[58px] flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white/70"
+                        >
+                            <span className={`flex h-8 w-9 items-center justify-center rounded-xl text-[17px] transition-[background-color,color,transform] duration-200 ${active ? "bg-white text-black" : "text-white/55"}`}>
+                                <Icon />
+                            </span>
+                            <span className={`max-w-full truncate text-[10px] font-medium transition-colors duration-200 ${active ? "text-white" : "text-white/50"}`}>{mobileLabel}</span>
+                        </Link>
+                    );
+                })}
+                <Link
+                    to={profilePath}
+                    aria-label={user ? "Your profile" : "Sign in"}
+                    aria-current={profileActive ? "page" : undefined}
+                    className="flex min-w-[58px] flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-white/70"
+                >
+                    <span className={`flex h-8 w-9 items-center justify-center rounded-xl text-[17px] transition-colors duration-200 ${profileActive ? "bg-white text-black" : "text-white/55"}`}><FaUserCircle /></span>
+                    <span className={`text-[10px] font-medium ${profileActive ? "text-white" : "text-white/50"}`}>{user ? "Profile" : "Sign in"}</span>
+                </Link>
+            </nav>
         </>
     );
 }
