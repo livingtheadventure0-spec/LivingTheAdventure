@@ -35,6 +35,7 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
 
     return (
         <section className="bg-neutral-950 py-12 sm:py-16 lg:py-20">
+            <style>{`.itinerary-scrollbar-hidden { scrollbar-width: none; -ms-overflow-style: none; } .itinerary-scrollbar-hidden::-webkit-scrollbar { display: none; }`}</style>
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <header className="mb-8 text-center sm:mb-12">
                     <h2 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">Trip Itinerary</h2>
