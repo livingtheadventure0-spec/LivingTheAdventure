@@ -29,11 +29,13 @@ function normalizeItinerary(value) {
 const Itinerary = ({ itinerary, gallery_image_urls }) => {
     const days = normalizeItinerary(itinerary);
     const galleryImages = (gallery_image_urls || []).slice(0, 4);
+    const hasItineraryAndGallery = days.length > 0 && galleryImages.length > 0;
 
     if (days.length === 0 && galleryImages.length === 0) return null;
 
     return (
         <section className="bg-neutral-950 py-12 sm:py-16 lg:py-20">
+            <style>{`.itinerary-scrollbar-hidden { scrollbar-width: none; -ms-overflow-style: none; } .itinerary-scrollbar-hidden::-webkit-scrollbar { display: none; }`}</style>
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <header className="mb-8 text-center sm:mb-12">
                     <h2 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">Trip Itinerary</h2>
@@ -44,7 +46,11 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
 
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
                     {days.length > 0 && (
-                        <div className="space-y-4">
+                        <div
+                            className={`min-w-0 space-y-4 ${hasItineraryAndGallery ? "lg:h-[42rem] lg:overflow-y-auto lg:overscroll-contain lg:pr-3 itinerary-scrollbar-hidden" : ""}`}
+                            aria-label={hasItineraryAndGallery ? "Scrollable trip itinerary" : undefined}
+                            tabIndex={hasItineraryAndGallery ? 0 : undefined}
+                        >
                             {days.map((day, index) => {
                                 const activities = Array.isArray(day.activities) ? day.activities.map(formatActivity).filter(Boolean) : [];
                                 const title = day.title || `Day ${index + 1}`;
@@ -77,9 +83,9 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                     )}
 
                     {galleryImages.length > 0 && (
-                        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div className={`grid grid-cols-2 gap-3 sm:gap-4 ${hasItineraryAndGallery ? "lg:h-[42rem] lg:grid-rows-2" : ""}`}>
                             {galleryImages.map((url, index) => (
-                                <div key={url || index} className="group relative aspect-[4/4.5] overflow-hidden rounded-xl bg-neutral-900">
+                                <div key={url || index} className="group relative aspect-[4/4.5] overflow-hidden rounded-xl bg-neutral-900 lg:aspect-auto lg:min-h-0">
                                     <img src={url} alt={`Trip itinerary gallery ${index + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                 </div>
