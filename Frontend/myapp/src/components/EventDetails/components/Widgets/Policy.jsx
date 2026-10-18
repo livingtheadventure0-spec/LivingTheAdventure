@@ -1,4 +1,4 @@
-import { FiPackage, FiShield, FiXCircle } from "react-icons/fi";
+import { FiInfo, FiPackage, FiShield, FiXCircle } from "react-icons/fi";
 
 const policySections = [
     {
@@ -59,9 +59,28 @@ export default function Policy({ event }) {
                     <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-neutral-400">
                         Before you book
                     </p>
-                    <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
-                        Good to know
-                    </h2>
+                    <div className="flex items-center justify-center gap-2">
+                        <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                            Good to know
+                        </h2>
+                        <span className="group relative inline-flex shrink-0">
+                            <button
+                                type="button"
+                                aria-label="Information about event policies"
+                                aria-describedby="event-policy-agreement-tooltip"
+                                className="inline-flex h-5 w-5 items-center justify-center rounded-full text-neutral-400 transition-colors hover:text-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                            >
+                                <FiInfo aria-hidden="true" className="h-4 w-4" />
+                            </button>
+                            <span
+                                id="event-policy-agreement-tooltip"
+                                role="tooltip"
+                                className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-left text-xs font-normal leading-5 text-neutral-200 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:w-72"
+                            >
+                                By continuing with your booking, you acknowledge that you’ve read and agree to the event policies below.
+                            </span>
+                        </span>
+                    </div>
                     <p className="mt-3 text-sm leading-6 text-neutral-400 sm:text-base">
                         A few important details to help you prepare and book with confidence.
                     </p>
