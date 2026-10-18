@@ -46,7 +46,7 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
                     {days.length > 0 && (
                         <div
-                            className={`min-w-0 space-y-4 ${hasItineraryAndGallery ? "lg:h-[42rem] lg:overflow-y-auto lg:overscroll-contain lg:pr-3" : ""}`}
+                            className={`min-w-0 space-y-4 ${hasItineraryAndGallery ? "lg:h-[42rem] lg:overflow-y-auto lg:overscroll-contain lg:pr-3 itinerary-scrollbar-hidden" : ""}`}
                             aria-label={hasItineraryAndGallery ? "Scrollable trip itinerary" : undefined}
                             tabIndex={hasItineraryAndGallery ? 0 : undefined}
                         >
