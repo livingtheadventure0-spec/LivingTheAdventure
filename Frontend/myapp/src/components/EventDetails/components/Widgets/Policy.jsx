@@ -1,32 +1,102 @@
-import { FiPackage, FiShield, FiXCircle } from "react-icons/fi";
+import { FiInfo, FiPackage, FiShield, FiXCircle } from "react-icons/fi";
 
-function PolicySection({ title, icon: Icon, children }) {
-    if (!children || (typeof children === "string" && !children.trim())) return null;
+const policySections = [
+    {
+        key: "things_to_carry_text",
+        title: "Things to Carry",
+        description: "Pack the essentials for a comfortable trip.",
+        icon: FiPackage,
+    },
+    {
+        key: "safety_guidelines_text",
+        title: "Safety Guidelines",
+        description: "Keep these important safety notes in mind.",
+        icon: FiShield,
+    },
+    {
+        key: "cancellation_policy_text",
+        title: "Cancellation Policy",
+        description: "Review the terms before confirming your booking.",
+        icon: FiXCircle,
+    },
+];
+
+function PolicyCard({ title, description, icon: Icon, children }) {
+    if (!children || (typeof children === "string" && !children.trim())) {
+        return null;
+    }
+
     return (
-        <div>
-            <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-white sm:text-xl">
-                <Icon aria-hidden="true" className="shrink-0 text-neutral-300" />
-                {title}
-            </h3>
-            <p className="whitespace-pre-line break-words text-sm leading-7 text-neutral-300 sm:text-base">{children}</p>
-        </div>
+        <article className="group h-full rounded-2xl border border-white/10 bg-neutral-900/70 p-5 transition-colors duration-200 hover:border-white/20 hover:bg-neutral-900 sm:p-6">
+            <div className="mb-5 flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-white">
+                    <Icon aria-hidden="true" className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                    <h3 className="text-base font-semibold text-white sm:text-lg">{title}</h3>
+                    <p className="mt-1 text-xs leading-5 text-neutral-400 sm:text-sm">{description}</p>
+                </div>
+            </div>
+            <div className="whitespace-pre-line break-words text-sm leading-7 text-neutral-300 sm:text-[15px]">
+                {children}
+            </div>
+        </article>
     );
 }
 
 export default function Policy({ event }) {
-    const hasContent = event?.things_to_carry_text || event?.safety_guidelines_text || event?.cancellation_policy_text;
-    if (!hasContent) return null;
+    const visibleSections = policySections.filter(({ key }) => {
+        const value = event?.[key];
+        return typeof value === "string" ? value.trim().length > 0 : Boolean(value);
+    });
+
+    if (!visibleSections.length) return null;
 
     return (
-        <section className="bg-[#111111] py-14 sm:py-20">
-            <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-                <h2 className="mb-8 text-center text-2xl font-bold text-white sm:mb-12 sm:text-4xl">Things to Know Before You Go</h2>
-                <div className="space-y-8 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-8">
-                    <PolicySection title="Things to Carry" icon={FiPackage}>{event.things_to_carry_text}</PolicySection>
-                    {event.things_to_carry_text && (event.safety_guidelines_text || event.cancellation_policy_text) && <div className="border-t border-neutral-700" />}
-                    <PolicySection title="Safety Guidelines" icon={FiShield}>{event.safety_guidelines_text}</PolicySection>
-                    {event.safety_guidelines_text && event.cancellation_policy_text && <div className="border-t border-neutral-700" />}
-                    <PolicySection title="Cancellation Policy" icon={FiXCircle}>{event.cancellation_policy_text}</PolicySection>
+        <section className="border-t border-white/[0.06] bg-[#0a0a0a] py-14 sm:py-20">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-12">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-neutral-400">
+                        Before you book
+                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                        <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                            Good to know
+                        </h2>
+                        <span className="group relative inline-flex shrink-0">
+                            <button
+                                type="button"
+                                aria-label="Information about event policies"
+                                aria-describedby="event-policy-agreement-tooltip"
+                                className="inline-flex h-5 w-5 items-center justify-center rounded-full text-neutral-400 transition-colors hover:text-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                            >
+                                <FiInfo aria-hidden="true" className="h-4 w-4" />
+                            </button>
+                            <span
+                                id="event-policy-agreement-tooltip"
+                                role="tooltip"
+                                className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 w-64 -translate-x-1/2 rounded-lg border border-white/10 bg-neutral-900 px-3 py-2 text-left text-xs font-normal leading-5 text-neutral-200 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 sm:w-72"
+                            >
+                                By continuing with your booking, you acknowledge that you’ve read and agree to the event policies below.
+                            </span>
+                        </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-neutral-400 sm:text-base">
+                        A few important details to help you prepare and book with confidence.
+                    </p>
+                </div>
+
+                <div className={`grid grid-cols-1 items-stretch gap-4 md:gap-5 ${visibleSections.length > 1 ? "md:grid-cols-2" : ""} ${visibleSections.length === 3 ? "xl:grid-cols-3" : ""}`}>
+                    {visibleSections.map(({ key, title, description, icon }) => (
+                        <PolicyCard
+                            key={key}
+                            title={title}
+                            description={description}
+                            icon={icon}
+                        >
+                            {event[key]}
+                        </PolicyCard>
+                    ))}
                 </div>
             </div>
         </section>

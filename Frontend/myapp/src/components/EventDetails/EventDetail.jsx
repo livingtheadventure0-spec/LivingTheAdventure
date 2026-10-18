@@ -614,8 +614,6 @@ function EventDetail() {
                 event={event}
             />
 
-            <Policy event={event} />
-
 
             {/* ================================================= */}
             {/* SCHEDULE + BOOKING */}
@@ -746,6 +744,10 @@ function EventDetail() {
                 </div>
 
             </section>
+
+            {/* Policies are intentionally placed after booking so guests can
+                review the essentials after seeing the booking options. */}
+            <Policy event={event} />
 
 
             {/* ================================================= */}
