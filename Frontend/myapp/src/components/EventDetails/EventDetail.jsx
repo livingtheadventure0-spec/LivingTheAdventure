@@ -180,12 +180,23 @@ function EventDetail() {
 
                 const schedule =
                     Array.isArray(data)
-                        ? data[0]
+                        ? data.find((item) => item && typeof item === "object")
                         : data;
 
+                // A schedule record can exist in the API even when its actual
+                // schedule details have not been filled in. Only render the
+                // schedule and booking UI when start and end dates are defined.
+                const scheduleData = schedule?.schedule_data || {};
+                const basicDetails = scheduleData.basic_details || {};
+                const startDate = basicDetails.start_datetime;
+                const endDate = basicDetails.end_datetime;
+                const hasValidScheduleDates =
+                    Boolean(startDate && endDate) &&
+                    !Number.isNaN(new Date(startDate).getTime()) &&
+                    !Number.isNaN(new Date(endDate).getTime());
 
                 setEventSchedule(
-                    schedule || null
+                    hasValidScheduleDates ? schedule : null
                 );
 
 
