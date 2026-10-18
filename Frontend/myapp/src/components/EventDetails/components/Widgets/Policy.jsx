@@ -22,7 +22,7 @@ export default function Policy({ event }) {
             <div className="container mx-auto max-w-4xl px-4 sm:px-6">
                 <h2 className="mb-8 text-center text-2xl font-bold text-white sm:mb-12 sm:text-4xl">Things to Know Before You Go</h2>
                 <div className="space-y-8 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5 sm:p-8">
-                    <PolicySection title="Things to Carry" icon={FiBackpack}>{event.things_to_carry_text}</PolicySection>
+                    <PolicySection title="Things to Carry" icon={FiPackage}>{event.things_to_carry_text}</PolicySection>
                     {event.things_to_carry_text && (event.safety_guidelines_text || event.cancellation_policy_text) && <div className="border-t border-neutral-700" />}
                     <PolicySection title="Safety Guidelines" icon={FiShield}>{event.safety_guidelines_text}</PolicySection>
                     {event.safety_guidelines_text && event.cancellation_policy_text && <div className="border-t border-neutral-700" />}
