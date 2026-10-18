@@ -46,11 +46,25 @@ function usePayment({
 
 
         if (existing) {
+            const onLoad = () => {
+                setRazorpayReady(Boolean(window.Razorpay));
+                if (!window.Razorpay) {
+                    setError("Razorpay Checkout did not initialize. Please refresh and try again.");
+                }
+            };
+            const onError = () => {
+                setError("Unable to load Razorpay Checkout. Check your network or browser extensions and retry.");
+                setRazorpayReady(false);
+            };
 
-            existing.addEventListener(
-                "load",
-                () => setRazorpayReady(true)
-            );
+            existing.addEventListener("load", onLoad, { once: true });
+            existing.addEventListener("error", onError, { once: true });
+
+            if (window.Razorpay) {
+                setRazorpayReady(true);
+                existing.removeEventListener("load", onLoad);
+                existing.removeEventListener("error", onError);
+            }
 
             return;
         }
@@ -67,15 +81,17 @@ function usePayment({
 
 
         script.onload = () => {
-            setRazorpayReady(true);
+            if (window.Razorpay) {
+                setRazorpayReady(true);
+                setError(null);
+            } else {
+                setError("Razorpay Checkout did not initialize. Please refresh and try again.");
+            }
         };
 
-
         script.onerror = () => {
-
-            setError(
-                "Unable to load Razorpay."
-            );
+            setRazorpayReady(false);
+            setError("Unable to load Razorpay Checkout. Check your network or browser extensions and retry.");
         };
 
 
@@ -192,11 +208,12 @@ function usePayment({
                 });
 
 
-            if (!order?.booking_id) {
+            if (!order?.booking_id || !order?.razorpay_order_id || !order?.razorpay_key) {
+                throw new Error("Razorpay order setup is incomplete. Check the backend Razorpay environment variables.");
+            }
 
-                throw new Error(
-                    "Booking ID was not returned."
-                );
+            if (!Number.isInteger(Number(order.amount)) || Number(order.amount) < 100) {
+                throw new Error("Invalid payment amount. The minimum payment is ₹1.00.");
             }
 
 

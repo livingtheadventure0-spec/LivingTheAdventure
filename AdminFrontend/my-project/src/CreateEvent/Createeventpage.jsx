@@ -58,6 +58,7 @@ const EMPTY_FORM = {
     excluded_services: [],
     safety_guidelines_text: "",
     cancellation_policy_text: "",
+    things_to_carry_text: "",
     seo_tags: [],
     seo_title: "",
     seo_description: "",
@@ -527,6 +528,17 @@ export default function CreateEventPage() {
                                 values={form.excluded_services}
                                 onChange={setList("excluded_services")}
                                 placeholder="Personal expenses"
+                            />
+                        </Field>
+                    </Section>
+
+                    <Section title="Things to Carry" description="Tell participants what they should bring for this event. Use one item per line.">
+                        <Field label="Things to carry" full>
+                            <textarea
+                                value={form.things_to_carry_text}
+                                onChange={set("things_to_carry_text")}
+                                placeholder={"Trekking shoes\nWater bottle\nRain jacket\nPersonal medication"}
+                                className={textareaClass}
                             />
                         </Field>
                     </Section>

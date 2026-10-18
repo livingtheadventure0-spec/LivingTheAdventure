@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import API from "../api";
 import Navbar from "../components/Navbar/NavBar";
 import EventScheduleSection from "../CreateEvent/Eventschedulesection";
+import { downloadEventPdf } from "../utils/eventPdf.js";
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -218,12 +219,22 @@ export default function EventDetailPage() {
                         </svg>
                         Events
                     </Link>
-                    <button
-                        onClick={() => navigate(`/admin/events/${event.event_id}/edit`)}
-                        className="bg-[#1B222C] hover:bg-[#A9782F] text-[#F5F2E9] text-sm font-medium px-5 py-2.5 rounded-sm transition-colors"
-                    >
-                        Edit event
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => downloadEventPdf(event)}
+                            className="inline-flex items-center gap-2 border border-[#1B222C]/25 bg-white px-4 py-2.5 text-sm font-medium text-[#1B222C] transition-colors hover:bg-[#1B222C]/[0.04] rounded-sm"
+                        >
+                            Download PDF
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => navigate(`/admin/events/${event.event_id}/edit`)}
+                            className="bg-[#1B222C] hover:bg-[#A9782F] text-[#F5F2E9] text-sm font-medium px-5 py-2.5 rounded-sm transition-colors"
+                        >
+                            Edit event
+                        </button>
+                    </div>
                 </div>
 
                 {/* Hero */}
@@ -389,6 +400,13 @@ export default function EventDetailPage() {
                     </Field>
                     <Field label="Excluded services" full>
                         <TagList items={event.excluded_services} />
+                    </Field>
+                </Section>
+
+                {/* Things to carry */}
+                <Section title="Things to Carry" description="What participants should bring for this event.">
+                    <Field label="Things to carry" full>
+                        <Prose>{event.things_to_carry_text}</Prose>
                     </Field>
                 </Section>
 

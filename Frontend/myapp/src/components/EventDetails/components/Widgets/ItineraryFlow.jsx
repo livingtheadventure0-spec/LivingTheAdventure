@@ -1,5 +1,13 @@
 import React from "react";
 
+function formatActivity(activity) {
+    if (typeof activity === "string" || typeof activity === "number") return String(activity);
+    if (!activity || typeof activity !== "object") return "";
+    const time = activity.time || activity.start_time || "";
+    const description = activity.activity || activity.description || activity.title || activity.name || "";
+    return [time, description].filter(Boolean).join(" — ");
+}
+
 function normalizeItinerary(value) {
     if (Array.isArray(value)) return value;
     if (typeof value !== "string" || !value.trim()) return [];
@@ -38,7 +46,7 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                     {days.length > 0 && (
                         <div className="space-y-4">
                             {days.map((day, index) => {
-                                const activities = Array.isArray(day.activities) ? day.activities.filter(Boolean) : [];
+                                const activities = Array.isArray(day.activities) ? day.activities.map(formatActivity).filter(Boolean) : [];
                                 const title = day.title || `Day ${index + 1}`;
                                 return (
                                     <article key={`${day.day || index + 1}-${index}`} className="flex min-w-0 gap-4 rounded-xl border border-white/10 bg-white/[0.04] p-4 transition-colors hover:bg-white/[0.06] sm:gap-5 sm:p-5">
