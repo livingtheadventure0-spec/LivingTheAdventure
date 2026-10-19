@@ -92,6 +92,8 @@ function Profile() {
                 );
                 if (!mounted) return;
                 setFavouriteEvents(events.filter(Boolean));
+            } catch (err) {
+                if (mounted) setErrorMsg(getApiErrorMessage(err, "Failed to load favourites"));
             } finally {
                 if (mounted) setFavLoading(false);
             }
