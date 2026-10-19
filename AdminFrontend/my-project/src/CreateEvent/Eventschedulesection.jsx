@@ -529,7 +529,7 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
                     {submitting && (
                         <span className="h-3.5 w-3.5 rounded-full border-2 border-[#F5F2E9]/40 border-t-[#F5F2E9] animate-spin" />
                     )}
-                    {submitting ? "Saving" : "Save schedule"}
+                    {submitting ? "Saving" : schedule ? "Save changes" : "Save schedule"}
                 </button>
             </div>
         </form>
@@ -727,11 +727,16 @@ export default function EventScheduleSection({ eventId }) {
             });
             setSchedules(Array.isArray(res.data) ? res.data : res.data ? [res.data] : []);
         } catch (err) {
-            setError(
-                err.readableMessage ||
-                err.response?.data?.message ||
-                "Couldn't load the schedule for this event."
-            );
+            if (err.response?.status === 404) {
+                setSchedules([]);
+            } else {
+                setError(
+                    err.readableMessage ||
+                    err.response?.data?.detail ||
+                    err.response?.data?.message ||
+                    "Could not load the schedule for this event."
+                );
+            }
         } finally {
             setLoading(false);
         }
@@ -809,6 +814,7 @@ export default function EventScheduleSection({ eventId }) {
                     onCancel={() => { setShowForm(false); setEditingSchedule(null); }}
                     onSaved={() => {
                         setShowForm(false);
+                        setEditingSchedule(null);
                         loadSchedules();
                     }}
                 />
