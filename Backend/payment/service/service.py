@@ -11,6 +11,8 @@ from sqlalchemy.sql import func
 
 from payment.razorpay_client import get_razorpay_client, get_razorpay_key_id
 
+from upload.s3 import private_media_url
+
 from payment.utils.utils import (
     find_pickup,
     validate_capacity,
@@ -567,7 +569,7 @@ def get_my_bookings(decoded: dict, db: Session):
             "event_id": str(booking.event_id),
             "schedule_id": str(booking.schedule_id),
             "event_title": event.title if event else "Adventure event",
-            "event_cover_image_url": event.cover_image_url if event else None,
+            "event_cover_image_url": private_media_url(event.cover_image_url) if event and event.cover_image_url else None,
             "event_location": event.location if event else None,
             "start_datetime": basic.get("start_datetime"),
             "end_datetime": basic.get("end_datetime"),
