@@ -5,6 +5,7 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from event.model.model import Event
+from schedule.model.model import EventSchedule
 from event.schema.schema import EventCreate, EventOut, EventUpdate
 from upload.s3 import private_media_url
 
@@ -80,6 +81,12 @@ def update_event(db: Session, db_obj: Event, event_in: EventUpdate):
 
 
 def delete_event(db: Session, db_obj: Event):
+    # Remove all schedules in the same transaction so an event can never be
+    # left with orphaned schedules. Deleting a schedule alone does not affect
+    # its parent event.
+    db.query(EventSchedule).filter(
+        EventSchedule.event_id == db_obj.event_id
+    ).delete(synchronize_session=False)
     db.delete(db_obj)
     db.commit()
 
