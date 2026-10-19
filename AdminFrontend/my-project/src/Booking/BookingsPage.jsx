@@ -59,6 +59,8 @@ export default function BookingsPage() {
   const [sort, setSort] = useState("Event date: newest first");
   const [expandedEvents, setExpandedEvents] = useState(() => new Set());
   const [expandedBookings, setExpandedBookings] = useState(() => new Set());
+  const [expandedEvents, setExpandedEvents] = useState(() => new Set());
+  const [expandedBookings, setExpandedBookings] = useState(() => new Set());
 
   const loadBookings = useCallback(async (nextPage = 1) => {
     setLoading(true);
@@ -121,8 +123,8 @@ export default function BookingsPage() {
     discounts: bookings.reduce((sum, b) => sum + Number(b.discount_amount || 0), 0),
   }), [bookings, total]);
 
-  const exportCSV = () => {
-    if (!filtered.length) return;
+  const exportCSV = (rows = filtered, filename = "event-bookings.csv") => {
+    if (!rows.length) return;
     const headers = ["Event", "Event date", "Booking ID", "User name", "User ID", "Phone", "Email", "People", "Price per person", "Subtotal", "Discount label", "Discount amount", "Final amount", "Amount paid", "Currency", "Booking status", "Payment status", "Payment method", "Razorpay order ID", "Razorpay payment ID", "Booked at"];
     const values = rows.map(b => [b.event_title, b.event_start_datetime, b.booking_id, b.user_name, b.user_id, b.user_phone, b.user_email, b.number_of_people, b.price_per_person, b.subtotal, b.discount_label, b.discount_amount, b.final_amount, b.amount_paid, b.currency, b.booking_status, b.payment_status, b.payment_method, b.razorpay_order_id, b.razorpay_payment_id, b.created_at]);
     const csv = [headers, ...values].map(row => row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -176,12 +178,14 @@ export default function BookingsPage() {
               <div style={{display:"flex",gap:14,flexWrap:"wrap",fontSize:12,color:C.muted}}><span><CalendarDays size={13} style={{verticalAlign:-2,marginRight:5}}/> {dateOnly(event.event_start_datetime)}</span>{event.event_location&&<span><MapPin size={13} style={{verticalAlign:-2,marginRight:5}}/> {event.event_location}</span>}<span><Users size={13} style={{verticalAlign:-2,marginRight:5}}/> {group.bookings.length} booking{group.bookings.length===1?"":"s"}</span></div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              <button onClick={()=>exportCSV(group.bookings, `${String(event.event_title||"event").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}-bookings.csv`)} style={linkStyle}><Download size={13}/> Export event CSV</button>
+              <button onClick={()=>setExpandedEvents(prev=>{const next=new Set(prev);next.has(group.key)?next.delete(group.key):next.add(group.key);return next})} style={linkStyle}><ChevronDown size={13}/>{expandedEvents.has(group.key)?"Hide bookings":"View bookings"}</button>
               <a className="booking-link" href={`${window.location.origin}/admin/events/${event.event_internal_id}`} target="_blank" rel="noreferrer" style={linkStyle}>Go to event admin <ExternalLink size={13}/></a>
               <a className="booking-link" href={`${userSite}/eventDetails/${event.event_id}`} target="_blank" rel="noreferrer" style={linkStyle}>Go to user event <ExternalLink size={13}/></a>
             </div>
           </div>
           <div style={{display:"flex",gap:22,flexWrap:"wrap",padding:"13px 20px",borderBottom:`1px solid ${C.border}`,fontSize:12}}><span style={{color:C.muted}}>Paid amount <strong style={{color:C.green,marginLeft:6}}>{money(eventPaid)}</strong></span><span style={{color:C.muted}}>Discounts <strong style={{color:C.ink,marginLeft:6}}>{money(eventDiscount)}</strong></span><span style={{color:C.muted}}>Event ID <code style={{color:C.ink,marginLeft:6}}>{event.event_id||"—"}</code></span></div>
-          <div style={{display:"grid",gap:0}}>
+          {expandedEvents.has(group.key) && <div style={{display:"grid",gap:0}}>
             {group.bookings.map((b,index)=><article key={b.booking_id} style={{padding:"20px",borderBottom:index===group.bookings.length-1?"none":`1px solid ${C.border}`}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"start",gap:12,flexWrap:"wrap",marginBottom:16}}>
                 <div><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:C.muted,marginBottom:5}}>Booking reference</div><code style={{fontSize:12,color:C.navy}}>{b.booking_id}</code><div style={{fontSize:11,color:C.muted,marginTop:5}}>Booked {dateTime(b.created_at)}</div></div>
@@ -208,14 +212,14 @@ export default function BookingsPage() {
                 <Detail label="Razorpay payment ID" value={b.razorpay_payment_id} mono/>
               </div>
             </article>)}
-          </div>
+          </div>}
         </section>;
       })}
     </div>}
 
     {!loading && total > limit && <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginTop:18,fontSize:13,color:C.muted}}><span>Page {page} of {totalPages} · {total} matching bookings</span><div style={{display:"flex",gap:8}}><button style={buttonStyle("light")} disabled={page<=1} onClick={()=>loadBookings(page-1)}>Previous</button><button style={buttonStyle("light")} disabled={page>=totalPages} onClick={()=>loadBookings(page+1)}>Next</button></div></div>}
     {!loading && total <= limit && <div style={{marginTop:16,fontSize:12,color:C.muted}}>{filtered.length} booking records shown{search ? " after search" : ""}.</div>}
-  </div>;
+    </main></div>;
 }
 
 function buttonStyle(kind) {
