@@ -176,7 +176,8 @@ export default function EventDetailPage() {
         setDeletingEvent(true);
         setError("");
         try {
-            await API.delete("/events/" + event.id);
+            const token = localStorage.getItem("admin_token");
+            await API.delete("/events/" + event.id, { headers: token ? { token } : {} });
             navigate("/admin/events", { replace: true });
         } catch (err) {
             setError(err.readableMessage || err.response?.data?.detail || err.response?.data?.message || "Could not delete this event.");
