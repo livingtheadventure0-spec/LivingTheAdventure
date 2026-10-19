@@ -265,8 +265,34 @@ function PickupCard({ pickup, index, onChange, onRemove }) {
 
 /* ---------- Create-schedule form ---------- */
 
-function ScheduleForm({ onCancel, onSaved, eventId }) {
-    const [form, setForm] = useState(emptyScheduleForm());
+function toDateTimeInput(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value).slice(0, 16);
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
+}
+
+function formFromSchedule(schedule) {
+    const data = schedule?.schedule_data || {};
+    const basic = data.basic_details || {};
+    const capacity = data.capacity_pricing || {};
+    const extra = data.extra_options || {};
+    return {
+        status: schedule?.status || "active",
+        basic_details: { ...emptyScheduleForm().basic_details, ...basic, start_datetime: toDateTimeInput(basic.start_datetime), end_datetime: toDateTimeInput(basic.end_datetime), duration_days: basic.duration_days ?? "" },
+        capacity_pricing: { ...emptyScheduleForm().capacity_pricing, ...capacity, base_price_per_person: capacity.base_price_per_person ?? "", max_participants: capacity.max_participants ?? "", seats_available: capacity.seats_available ?? "" },
+        extra_options: { ...emptyScheduleForm().extra_options, ...extra, inclusions: Array.isArray(extra.inclusions) ? extra.inclusions : [], exclusions: Array.isArray(extra.exclusions) ? extra.exclusions : [] },
+        pickups: Array.isArray(data.pickups) ? data.pickups.map((pickup, index) => ({
+            ...emptyPickup(index + 1), ...pickup, pickup_datetime: toDateTimeInput(pickup.pickup_datetime), price_per_person: pickup.price_per_person ?? "",
+            address: { ...emptyAddress(), ...(pickup.address || {}) },
+            discounts: Array.isArray(pickup.discounts) ? pickup.discounts.map(discount => ({ ...emptyDiscount(), ...discount, value: discount.value ?? "", min_group_size: discount.min_group_size ?? "" })) : [],
+        })) : [],
+    };
+}
+
+function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
+    const [form, setForm] = useState(() => formFromSchedule(schedule));
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
@@ -297,7 +323,7 @@ function ScheduleForm({ onCancel, onSaved, eventId }) {
 
         const payload = {
             event_id: eventId,
-            schedule_id: crypto.randomUUID(),
+            ...(schedule?.schedule_id ? { schedule_id: schedule.schedule_id } : {}),
             status: form.status,
             schedule_data: {
                 basic_details: {
@@ -325,9 +351,9 @@ function ScheduleForm({ onCancel, onSaved, eventId }) {
         };
 
         try {
-            const res = await API.post("/event-schedules/", payload, {
-                headers: getAuthHeaders(),
-            });
+            const res = schedule?.id
+                ? await API.put(`/event-schedules/${schedule.id}`, payload, { headers: getAuthHeaders() })
+                : await API.post("/event-schedules/", { ...payload, schedule_id: crypto.randomUUID() }, { headers: getAuthHeaders() });
             onSaved(res.data);
         } catch (err) {
             setError(
