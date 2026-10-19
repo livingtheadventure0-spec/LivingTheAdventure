@@ -172,7 +172,7 @@ def list_all_bookings(
     ),
     event_date: str | None = Query(
         None,
-        pattern=r"^\\d{4}-\\d{2}-\\d{2}$",
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
         description="Filter by the event schedule start date (YYYY-MM-DD)",
     ),
     db: Session = Depends(get_db),
