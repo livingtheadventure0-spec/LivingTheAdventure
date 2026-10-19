@@ -184,12 +184,36 @@ export default function BookingsPage() {
           </div>
           <div style={{display:"flex",gap:22,flexWrap:"wrap",padding:"13px 20px",borderBottom:`1px solid ${C.border}`,fontSize:12}}><span style={{color:C.muted}}>Paid amount <strong style={{color:C.green,marginLeft:6}}>{money(eventPaid)}</strong></span><span style={{color:C.muted}}>Discounts <strong style={{color:C.ink,marginLeft:6}}>{money(eventDiscount)}</strong></span><span style={{color:C.muted}}>Event ID <code style={{color:C.ink,marginLeft:6}}>{event.event_id||"—"}</code></span></div>
           {expandedEvents.has(group.key) && <div style={{display:"grid",gap:0}}>
-            {group.bookings.map((b,index)=><article key={b.booking_id} style={{padding:"20px",borderBottom:index===group.bookings.length-1?"none":`1px solid ${C.border}`}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"start",gap:12,flexWrap:"wrap",marginBottom:16}}>
-                <div><div style={{fontSize:10,textTransform:"uppercase",letterSpacing:1,color:C.muted,marginBottom:5}}>Booking reference</div><code style={{fontSize:12,color:C.navy}}>{b.booking_id}</code><div style={{fontSize:11,color:C.muted,marginTop:5}}>Booked {dateTime(b.created_at)}</div></div>
-                <div style={{display:"flex",gap:6,flexWrap:"wrap"}}><StatusPill value={b.booking_status}/><StatusPill value={b.payment_status}/></div>
-              </div>
-              <div className="booking-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:"17px 22px"}}>
+            {group.bookings.map((b,index)=><article key={b.booking_id} style={{borderBottom:index===group.bookings.length-1?"none":`1px solid ${C.border}`}}>
+              <button
+                type="button"
+                aria-expanded={expandedBookings.has(b.booking_id)}
+                onClick={() => setExpandedBookings(previous => {
+                  const next = new Set(previous);
+                  if (next.has(b.booking_id)) next.delete(b.booking_id);
+                  else next.add(b.booking_id);
+                  return next;
+                })}
+                style={{display:"grid",gridTemplateColumns:"minmax(170px,1.5fr) minmax(140px,1fr) minmax(160px,1.4fr) auto auto",alignItems:"center",gap:14,width:"100%",padding:"16px 20px",border:0,background:expandedBookings.has(b.booking_id)?"#FBF9F3":"#FFFFFF",textAlign:"left",cursor:"pointer",color:C.ink}}
+              >
+                <span style={{minWidth:0}}>
+                  <span style={{display:"block",fontSize:13,fontWeight:700,color:C.navy,overflowWrap:"anywhere"}}>{b.user_name || "Customer name unavailable"}</span>
+                  <span style={{display:"block",fontSize:12,color:C.muted,marginTop:4}}>{b.user_phone || "No phone number"}</span>
+                </span>
+                <span style={{minWidth:0}}>
+                  <span style={{display:"block",fontSize:10,textTransform:"uppercase",letterSpacing:.7,color:C.muted,marginBottom:4}}>Booking ID</span>
+                  <code style={{fontSize:11,overflowWrap:"anywhere",color:C.navy}}>{b.booking_id}</code>
+                </span>
+                <span>
+                  <span style={{display:"block",fontSize:10,textTransform:"uppercase",letterSpacing:.7,color:C.muted,marginBottom:4}}>Booking amount</span>
+                  <strong style={{fontSize:13,color:C.ink}}>{money(b.final_amount,b.currency)}</strong>
+                </span>
+                <span style={{display:"flex",gap:5,flexWrap:"wrap"}}><StatusPill value={b.booking_status}/><StatusPill value={b.payment_status}/></span>
+                <ChevronDown size={16} style={{color:C.muted,transform:expandedBookings.has(b.booking_id)?"rotate(180deg)":"rotate(0deg)",transition:"transform .15s"}}/>
+              </button>
+              {expandedBookings.has(b.booking_id) && <>
+              <div style={{padding:"0 20px 14px",fontSize:11,color:C.muted}}>Booked {dateTime(b.created_at)}</div>
+              <div className="booking-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:"17px 22px",padding:"0 20px 20px"}}>
                 <Detail label="Customer name" value={b.user_name}/>
                 <Detail label="Phone number" value={b.user_phone}/>
                 <Detail label="Email" value={b.user_email}/>
