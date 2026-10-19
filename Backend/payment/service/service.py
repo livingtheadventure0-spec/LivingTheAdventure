@@ -11,6 +11,8 @@ from sqlalchemy.sql import func
 
 from payment.razorpay_client import get_razorpay_client, get_razorpay_key_id
 
+from upload.s3 import private_media_url
+
 from payment.utils.utils import (
     find_pickup,
     validate_capacity,
@@ -537,3 +539,53 @@ def get_all_bookings(
         "limit": limit,
         "bookings": bookings,
     }
+
+
+def get_my_bookings(decoded: dict, db: Session):
+    """Return the authenticated user's bookings with event and schedule details."""
+    user = get_current_user(decoded, db)
+
+    rows = (
+        db.query(Booking, Payment.payment_status, Event, EventSchedule)
+        .outerjoin(Payment, Payment.booking_id == Booking.booking_id)
+        .outerjoin(Event, Event.event_id == Booking.event_id)
+        .outerjoin(EventSchedule, EventSchedule.schedule_id == Booking.schedule_id)
+        .filter(Booking.user_id == user.user_id)
+        .order_by(Booking.created_at.desc())
+        .all()
+    )
+
+    results = []
+    for booking, payment_status, event, schedule in rows:
+        schedule_data = (schedule.schedule_data if schedule else {}) or {}
+        basic = schedule_data.get("basic_details", {}) or {}
+        pickups = schedule_data.get("pickups", []) or []
+        pickup = next(
+            (item for item in pickups if str(item.get("pickup_uuid")) == str(booking.pickup_uuid)),
+            {},
+        )
+        results.append({
+            "booking_id": str(booking.booking_id),
+            "event_id": str(booking.event_id),
+            "schedule_id": str(booking.schedule_id),
+            "event_title": event.title if event else "Adventure event",
+            "event_cover_image_url": private_media_url(event.cover_image_url) if event and event.cover_image_url else None,
+            "event_location": event.location if event else None,
+            "start_datetime": basic.get("start_datetime"),
+            "end_datetime": basic.get("end_datetime"),
+            "duration_days": basic.get("duration_days"),
+            "pickup_point": pickup.get("pickup_point"),
+            "pickup_city": pickup.get("city_name"),
+            "pickup_datetime": pickup.get("pickup_datetime"),
+            "number_of_people": booking.number_of_people,
+            "price_per_person": booking.price_per_person,
+            "subtotal": booking.subtotal,
+            "discount_amount": booking.discount_amount,
+            "final_amount": booking.final_amount,
+            "currency": booking.currency,
+            "booking_status": booking.booking_status,
+            "payment_status": payment_status or "UNKNOWN",
+            "created_at": booking.created_at.isoformat() if booking.created_at else None,
+        })
+
+    return {"total": len(results), "bookings": results}

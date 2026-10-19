@@ -7,7 +7,7 @@ import {
     FaSignOutAlt, FaSave, FaTimes, FaCalendarAlt, FaHistory
 } from "react-icons/fa";
 import axios from "axios";
-import { apiUrl } from "../../api/config.js";
+import { API_BASE_URL, apiUrl } from "../../api/config.js";
 import { getApiErrorMessage } from "../../api/errors.js";
 import { fetchMe, updateProfile } from "./Profileapi.js";
 import { fetchFavourites } from "../../api/favourites.js";
@@ -83,7 +83,7 @@ function Profile() {
                 if (!mounted) return;
                 setFavouriteIds(Array.isArray(ids) ? ids : []);
                 const events = await Promise.all(
-                    (ids || []).slice(0, 50).map(async (id) => {
+                    (ids || []).map(async (id) => {
                         try {
                             const res = await axios.get(apiUrl(`/events/by-uuid/${id}`));
                             return res.data;
@@ -92,6 +92,8 @@ function Profile() {
                 );
                 if (!mounted) return;
                 setFavouriteEvents(events.filter(Boolean));
+            } catch (err) {
+                if (mounted) setErrorMsg(getApiErrorMessage(err, "Failed to load favourites"));
             } finally {
                 if (mounted) setFavLoading(false);
             }
@@ -100,19 +102,38 @@ function Profile() {
         return () => { mounted = false; };
     }, [user]);
 
-    // TODO: Load current bookings when activeTab changes
+    // Load the signed-in user's bookings from the authenticated API.
     useEffect(() => {
-        if (activeTab === "bookings" && currentBookings.length === 0) {
-            // loadCurrentBookings();
-        }
-    }, [activeTab]);
-
-    // TODO: Load previous events when activeTab changes
-    useEffect(() => {
-        if (activeTab === "previous" && previousEvents.length === 0) {
-            // loadPreviousEvents();
-        }
-    }, [activeTab]);
+        let mounted = true;
+        const loadBookings = async () => {
+            if (!user) return;
+            setBookingsLoading(true);
+            setPreviousLoading(true);
+            try {
+                const token = await user.getIdToken();
+                const response = await axios.get(API_BASE_URL + "/payments/my-bookings", {
+                    headers: { Authorization: "Bearer " + token },
+                });
+                if (!mounted) return;
+                const bookings = Array.isArray(response.data?.bookings) ? response.data.bookings : [];
+                const current = [];
+                const previous = [];
+                bookings.forEach((booking) => {
+                    const endDate = booking.end_datetime ? new Date(booking.end_datetime).getTime() : NaN;
+                    if (Number.isFinite(endDate) && endDate < Date.now()) previous.push(booking);
+                    else current.push(booking);
+                });
+                setCurrentBookings(current);
+                setPreviousEvents(previous);
+            } catch (err) {
+                if (mounted) setErrorMsg(getApiErrorMessage(err, "Failed to load your bookings"));
+            } finally {
+                if (mounted) { setBookingsLoading(false); setPreviousLoading(false); }
+            }
+        };
+        loadBookings();
+        return () => { mounted = false; };
+    }, [user]);
 
     const handleLogout = async () => { await logout(); navigate("/"); };
 
@@ -394,7 +415,7 @@ function Profile() {
                                     }`}
                             >
                                 <FaCalendarAlt className="text-xs" />
-                                <span>Current Bookings</span>
+                                <span>Bookings</span>
                                 {currentBookings.length > 0 && (
                                     <span className="ml-1 px-2 py-0.5 text-xs bg-gray-800 rounded-full">
                                         {currentBookings.length}
@@ -410,7 +431,7 @@ function Profile() {
                                     }`}
                             >
                                 <FaHistory className="text-xs" />
-                                <span>Previous Events</span>
+                                <span>Past Bookings</span>
                             </button>
                         </div>
 
@@ -421,7 +442,7 @@ function Profile() {
                                 <FavouritesTab
                                     loading={favLoading}
                                     favourites={favouriteEvents}
-                                    count={favouriteIds.length}
+                                    count={favouriteEvents.length}
                                 />
                             )}
 
@@ -516,6 +537,41 @@ function FavouritesTab({ loading, favourites, count }) {
     );
 }
 
+function BookingCards({ bookings }) {
+    const formatDate = (value) => {
+        if (!value) return "Date to be confirmed";
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? value : date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    };
+    if (!bookings.length) return null;
+    return (
+        <div className="space-y-4">
+            {bookings.map((booking) => (
+                <article key={booking.booking_id} className="overflow-hidden rounded-xl border border-gray-800 bg-[#111111] sm:flex">
+                    {booking.event_cover_image_url && <img src={booking.event_cover_image_url} alt={booking.event_title || "Booked event"} className="h-44 w-full object-cover sm:h-auto sm:w-52" loading="lazy" /> }
+                    <div className="min-w-0 flex-1 p-4 sm:p-5">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div><h3 className="break-words text-base font-semibold text-white">{booking.event_title || "Adventure event"}</h3>{booking.event_location && <p className="mt-1 text-sm text-gray-400">{booking.event_location}</p>}</div>
+                            <span className="rounded-full border border-gray-700 px-2.5 py-1 text-xs text-gray-300">{(booking.payment_status || "UNKNOWN").replaceAll("_", " ")}</span>
+                        </div>
+                        <div className="mt-4 grid grid-cols-1 gap-3 text-sm text-gray-300 sm:grid-cols-2">
+                            <div><p className="text-xs uppercase tracking-wide text-gray-500">Departure</p><p className="mt-1">{formatDate(booking.start_datetime)}</p></div>
+                            <div><p className="text-xs uppercase tracking-wide text-gray-500">Return</p><p className="mt-1">{formatDate(booking.end_datetime)}</p></div>
+                            <div><p className="text-xs uppercase tracking-wide text-gray-500">Pickup</p><p className="mt-1">{[booking.pickup_point, booking.pickup_city].filter(Boolean).join(", ") || "Not specified"}</p></div>
+                            <div><p className="text-xs uppercase tracking-wide text-gray-500">Participants</p><p className="mt-1">{booking.number_of_people}</p></div>
+                        </div>
+                        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-800 pt-3">
+                            <p className="text-sm text-gray-400">Booking status: <span className="text-gray-200">{(booking.booking_status || "PENDING").replaceAll("_", " ")}</span></p>
+                            <p className="text-lg font-semibold text-white">{booking.currency || "INR"} {Number(booking.final_amount || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>
+                        <p className="mt-2 break-all text-xs text-gray-600">Booking reference: {booking.booking_id}</p>
+                    </div>
+                </article>
+            ))}
+        </div>
+    );
+}
+
 function CurrentBookingsTab({ loading, bookings }) {
     if (loading) {
         return (
@@ -526,20 +582,17 @@ function CurrentBookingsTab({ loading, bookings }) {
         );
     }
 
-    // TODO: Replace with actual booking data
-    return (
-        <div className="bg-[#111111] rounded-xl border border-gray-800 py-20 px-6 text-center">
-            <FaCalendarAlt className="mx-auto text-4xl text-gray-700 mb-4" />
-            <p className="text-gray-400 text-base font-medium">No current bookings</p>
-            <p className="text-gray-600 text-sm mt-2">Book an adventure to see it here</p>
-            <a
-                href="/"
-                className="inline-block mt-6 text-sm text-white bg-white/10 border border-gray-700 rounded-lg px-6 py-2.5 hover:bg-white/15 hover:border-gray-600 transition-colors"
-            >
-                Browse Events
-            </a>
-        </div >
-    );
+    if (!bookings.length) {
+        return (
+            <div className="rounded-xl border border-gray-800 bg-[#111111] px-6 py-20 text-center">
+                <FaCalendarAlt className="mx-auto mb-4 text-4xl text-gray-700" />
+                <p className="text-base font-medium text-gray-300">No bookings yet</p>
+                <p className="mt-2 text-sm text-gray-600">Once you book an adventure, your booking details will appear here.</p>
+                <a href="/" className="mt-6 inline-block rounded-lg border border-gray-700 bg-white/10 px-6 py-2.5 text-sm text-white hover:bg-white/15">Explore Adventures</a>
+            </div>
+        );
+    }
+    return <BookingCards bookings={bookings} />;
 }
 
 function PreviousEventsTab({ loading, events }) {
@@ -552,14 +605,16 @@ function PreviousEventsTab({ loading, events }) {
         );
     }
 
-    // TODO: Replace with actual previous events data
-    return (
-        <div className="bg-[#111111] rounded-xl border border-gray-800 py-20 px-6 text-center">
-            <FaHistory className="mx-auto text-4xl text-gray-700 mb-4" />
-            <p className="text-gray-400 text-base font-medium">No previous events</p>
-            <p className="text-gray-600 text-sm mt-2">Your completed adventures will appear here</p>
-        </div>
-    );
+    if (!events.length) {
+        return (
+            <div className="rounded-xl border border-gray-800 bg-[#111111] px-6 py-20 text-center">
+                <FaHistory className="mx-auto mb-4 text-4xl text-gray-700" />
+                <p className="text-base font-medium text-gray-300">No past bookings yet</p>
+                <p className="mt-2 text-sm text-gray-600">Completed adventures will appear here after their return date.</p>
+            </div>
+        );
+    }
+    return <BookingCards bookings={events} />;
 }
 
 export default Profile;
