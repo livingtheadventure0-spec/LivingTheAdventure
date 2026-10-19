@@ -553,6 +553,7 @@ def get_all_bookings(
             "user_phone": user.phone if user else None,
             "user_email": user.email if user else None,
             "event_id": str(booking.event_id),
+            "event_internal_id": event.id if event else None,
             "event_title": event.title if event else "Deleted event",
             "event_state": event.state if event else None,
             "event_status": event.status if event else None,
