@@ -538,7 +538,7 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
 
 /* ---------- Read-only schedule summary card ---------- */
 
-function ScheduleCard({ schedule }) {
+function ScheduleCard({ schedule, onEdit, onDelete }) {
     const [expanded, setExpanded] = useState(false);
     const d = schedule.schedule_data || {};
     const basic = d.basic_details || {};
@@ -548,6 +548,10 @@ function ScheduleCard({ schedule }) {
 
     return (
         <div className="border border-[#1B222C]/10 rounded-sm mb-4 overflow-hidden">
+            <div className="flex flex-wrap items-center justify-end gap-2 border-b border-[#1B222C]/8 px-4 py-2">
+                <button type="button" onClick={onEdit} className="text-xs font-medium text-[#1B222C] hover:text-[#A9782F]">Edit schedule</button>
+                <button type="button" onClick={onDelete} className="text-xs font-medium text-[#9C4A3C] hover:underline">Delete schedule</button>
+            </div>
             <button
                 type="button"
                 onClick={() => setExpanded((v) => !v)}
@@ -712,6 +716,7 @@ export default function EventScheduleSection({ eventId }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [showForm, setShowForm] = useState(false);
+    const [editingSchedule, setEditingSchedule] = useState(null);
 
     const loadSchedules = async () => {
         setLoading(true);
@@ -720,7 +725,7 @@ export default function EventScheduleSection({ eventId }) {
             const res = await API.get(`/event-schedules/by-event/${eventId}`, {
                 headers: getAuthHeaders(),
             });
-            setSchedules(res.data || []);
+            setSchedules(Array.isArray(res.data) ? res.data : res.data ? [res.data] : []);
         } catch (err) {
             setError(
                 err.readableMessage ||
@@ -748,7 +753,7 @@ export default function EventScheduleSection({ eventId }) {
                 </div>
                 {!showForm && !loading && (
                     <button
-                        onClick={() => setShowForm(true)}
+                        onClick={() => { setEditingSchedule(null); setShowForm(true); }}
                         className="bg-[#1B222C] hover:bg-[#A9782F] text-[#F5F2E9] text-sm font-medium px-4 py-2 rounded-sm transition-colors"
                     >
                         {schedules.length === 0 ? "+ Add schedule" : "+ Add another schedule"}
@@ -775,12 +780,33 @@ export default function EventScheduleSection({ eventId }) {
 
             {!loading &&
                 !error &&
-                schedules.map((s) => <ScheduleCard key={s.schedule_id || s.id} schedule={s} />)}
+                schedules.map((s) => (
+                    <ScheduleCard
+                        key={s.schedule_id || s.id}
+                        schedule={s}
+                        onEdit={() => { setEditingSchedule(s); setShowForm(true); }}
+                        onDelete={async () => {
+                            const startDate = s.schedule_data?.basic_details?.start_datetime;
+                            const label = startDate ? fmtDateTime(startDate) : "this schedule";
+                            if (!window.confirm("Delete " + label + "? The event itself will remain.")) return;
+                            setError("");
+                            try {
+                                await API.delete("/event-schedules/" + s.id, { headers: getAuthHeaders() });
+                                setSchedules(current => current.filter(item => item.id !== s.id));
+                                if (editingSchedule?.id === s.id) { setEditingSchedule(null); setShowForm(false); }
+                            } catch (err) {
+                                setError(err.readableMessage || err.response?.data?.detail || err.response?.data?.message || "Could not delete this schedule.");
+                            }
+                        }}
+                    />
+                ))}
 
             {showForm && (
                 <ScheduleForm
+                    key={editingSchedule?.id || "new-schedule"}
+                    schedule={editingSchedule}
                     eventId={eventId}
-                    onCancel={() => setShowForm(false)}
+                    onCancel={() => { setShowForm(false); setEditingSchedule(null); }}
                     onSaved={() => {
                         setShowForm(false);
                         loadSchedules();
