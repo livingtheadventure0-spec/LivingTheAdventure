@@ -169,7 +169,7 @@ export default function BookingsPage() {
               <div style={{display:"flex",gap:14,flexWrap:"wrap",fontSize:12,color:C.muted}}><span><CalendarDays size={13} style={{verticalAlign:-2,marginRight:5}}/ {dateOnly(event.event_start_datetime)}</span>{event.event_location&&<span><MapPin size={13} style={{verticalAlign:-2,marginRight:5}}/ {event.event_location}</span>}<span><Users size={13} style={{verticalAlign:-2,marginRight:5}}/ {group.bookings.length} booking{group.bookings.length===1?"":"s"}</span></div>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              <a className="booking-link" href={`${window.location.origin}/admin/events/${event.event_id}`} target="_blank" rel="noreferrer" style={linkStyle}>Go to event admin <ExternalLink size={13}/></a>
+              <a className="booking-link" href={`${window.location.origin}/admin/events/${event.event_internal_id}`} target="_blank" rel="noreferrer" style={linkStyle}>Go to event admin <ExternalLink size={13}/></a>
               <a className="booking-link" href={`${userSite}/eventDetails/${event.event_id}`} target="_blank" rel="noreferrer" style={linkStyle}>Go to user event <ExternalLink size={13}/></a>
             </div>
           </div>
