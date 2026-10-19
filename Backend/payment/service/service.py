@@ -8,6 +8,7 @@ from schedule.model.model import EventSchedule
 from payment.model.Booking import Booking
 from payment.model.Payment import Payment
 from sqlalchemy.sql import func
+from sqlalchemy import case
 
 from payment.razorpay_client import get_razorpay_client, get_razorpay_key_id
 
@@ -524,7 +525,7 @@ def get_all_bookings(
     # scheduled event first; booking creation time breaks ties.
     live_state = func.lower(func.coalesce(Event.state, ""))
     rows = query.order_by(
-        func.case(
+        case(
             (live_state.in_(["in progress", "launched now!", "live"]), 0),
             else_=1,
         ),
