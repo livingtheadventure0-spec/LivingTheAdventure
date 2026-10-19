@@ -7,7 +7,7 @@ import {
     FaSignOutAlt, FaSave, FaTimes, FaCalendarAlt, FaHistory
 } from "react-icons/fa";
 import axios from "axios";
-import { apiUrl } from "../../api/config.js";
+import { API_BASE_URL, apiUrl } from "../../api/config.js";
 import { getApiErrorMessage } from "../../api/errors.js";
 import { fetchMe, updateProfile } from "./Profileapi.js";
 import { fetchFavourites } from "../../api/favourites.js";
@@ -83,7 +83,7 @@ function Profile() {
                 if (!mounted) return;
                 setFavouriteIds(Array.isArray(ids) ? ids : []);
                 const events = await Promise.all(
-                    (ids || []).slice(0, 50).map(async (id) => {
+                    (ids || []).map(async (id) => {
                         try {
                             const res = await axios.get(apiUrl(`/events/by-uuid/${id}`));
                             return res.data;
@@ -100,19 +100,38 @@ function Profile() {
         return () => { mounted = false; };
     }, [user]);
 
-    // TODO: Load current bookings when activeTab changes
+    // Load the signed-in user's bookings from the authenticated API.
     useEffect(() => {
-        if (activeTab === "bookings" && currentBookings.length === 0) {
-            // loadCurrentBookings();
-        }
-    }, [activeTab]);
-
-    // TODO: Load previous events when activeTab changes
-    useEffect(() => {
-        if (activeTab === "previous" && previousEvents.length === 0) {
-            // loadPreviousEvents();
-        }
-    }, [activeTab]);
+        let mounted = true;
+        const loadBookings = async () => {
+            if (!user) return;
+            setBookingsLoading(true);
+            setPreviousLoading(true);
+            try {
+                const token = await user.getIdToken();
+                const response = await axios.get(API_BASE_URL + "/payments/my-bookings", {
+                    headers: { Authorization: "Bearer " + token },
+                });
+                if (!mounted) return;
+                const bookings = Array.isArray(response.data?.bookings) ? response.data.bookings : [];
+                const current = [];
+                const previous = [];
+                bookings.forEach((booking) => {
+                    const endDate = booking.end_datetime ? new Date(booking.end_datetime).getTime() : NaN;
+                    if (Number.isFinite(endDate) && endDate < Date.now()) previous.push(booking);
+                    else current.push(booking);
+                });
+                setCurrentBookings(current);
+                setPreviousEvents(previous);
+            } catch (err) {
+                if (mounted) setErrorMsg(getApiErrorMessage(err, "Failed to load your bookings"));
+            } finally {
+                if (mounted) { setBookingsLoading(false); setPreviousLoading(false); }
+            }
+        };
+        loadBookings();
+        return () => { mounted = false; };
+    }, [user]);
 
     const handleLogout = async () => { await logout(); navigate("/"); };
 
@@ -394,7 +413,7 @@ function Profile() {
                                     }`}
                             >
                                 <FaCalendarAlt className="text-xs" />
-                                <span>Current Bookings</span>
+                                <span>Bookings</span>
                                 {currentBookings.length > 0 && (
                                     <span className="ml-1 px-2 py-0.5 text-xs bg-gray-800 rounded-full">
                                         {currentBookings.length}
@@ -410,7 +429,7 @@ function Profile() {
                                     }`}
                             >
                                 <FaHistory className="text-xs" />
-                                <span>Previous Events</span>
+                                <span>Past Bookings</span>
                             </button>
                         </div>
 
@@ -421,7 +440,7 @@ function Profile() {
                                 <FavouritesTab
                                     loading={favLoading}
                                     favourites={favouriteEvents}
-                                    count={favouriteIds.length}
+                                    count={favouriteEvents.length}
                                 />
                             )}
 
