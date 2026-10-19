@@ -18,6 +18,7 @@ from payment.service.service import (
     verify_payment,
     get_payment_details,
     get_all_bookings,
+    get_my_bookings,
 )
 
 from logs.service.service import create_user_action_log
@@ -179,6 +180,19 @@ def list_all_bookings(
         booking_status=booking_status,
         payment_status=payment_status,
     )
+
+
+# ============================================================
+# USER - GET MY BOOKINGS
+# ============================================================
+
+
+@router.get("/my-bookings")
+def list_my_bookings(
+    decoded=Depends(firebase_auth_dep),
+    db: Session = Depends(get_db),
+):
+    return get_my_bookings(decoded=decoded, db=db)
 
 
 # ============================================================
