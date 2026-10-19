@@ -59,8 +59,6 @@ export default function BookingsPage() {
   const [sort, setSort] = useState("Event date: newest first");
   const [expandedEvents, setExpandedEvents] = useState(() => new Set());
   const [expandedBookings, setExpandedBookings] = useState(() => new Set());
-  const [expandedEvents, setExpandedEvents] = useState(() => new Set());
-  const [expandedBookings, setExpandedBookings] = useState(() => new Set());
 
   const loadBookings = useCallback(async (nextPage = 1) => {
     setLoading(true);
