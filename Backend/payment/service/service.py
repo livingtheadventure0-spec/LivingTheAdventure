@@ -481,15 +481,25 @@ def get_all_bookings(
     limit: int = 20,
     booking_status: str | None = None,
     payment_status: str | None = None,
+    event_date: str | None = None,
 ):
+    """Return richly joined admin booking rows with event-date filtering."""
     query = db.query(
         Booking,
         Payment.payment_status,
         Payment.razorpay_order_id,
         Payment.razorpay_payment_id,
+        Event,
+        User,
+        EventSchedule,
     ).outerjoin(
-        Payment,
-        Payment.booking_id == Booking.booking_id,
+        Payment, Payment.booking_id == Booking.booking_id,
+    ).outerjoin(
+        Event, Event.event_id == Booking.event_id,
+    ).outerjoin(
+        User, User.user_id == Booking.user_id,
+    ).outerjoin(
+        EventSchedule, EventSchedule.schedule_id == Booking.schedule_id,
     )
 
     if booking_status:
@@ -498,48 +508,95 @@ def get_all_bookings(
     if payment_status:
         query = query.filter(Payment.payment_status == payment_status)
 
-    total = query.count()
-
-    offset = (page - 1) * limit
-
-    rows = query.order_by(Booking.created_at.desc()).offset(offset).limit(limit).all()
-
-    bookings = []
-
-    for booking, payment_status_value, razorpay_order_id, razorpay_payment_id in rows:
-        bookings.append(
-            {
-                "booking_id": booking.booking_id,
-                "user_id": booking.user_id,
-                "event_id": booking.event_id,
-                "schedule_id": booking.schedule_id,
-                "pickup_uuid": booking.pickup_uuid,
-                "number_of_people": booking.number_of_people,
-                "price_per_person": booking.price_per_person,
-                "subtotal": booking.subtotal,
-                "discount_label": booking.discount_label,
-                "discount_type": booking.discount_type,
-                "discount_scope": booking.discount_scope,
-                "discount_value": booking.discount_value,
-                "discount_amount": booking.discount_amount,
-                "final_amount": booking.final_amount,
-                "currency": booking.currency,
-                "booking_status": booking.booking_status,
-                "payment_status": payment_status_value,
-                "razorpay_order_id": razorpay_order_id,
-                "razorpay_payment_id": razorpay_payment_id,
-                "created_at": booking.created_at,
-                "updated_at": booking.updated_at,
-            }
+    if event_date:
+        # The calendar filters by the event's scheduled start date, not by
+        # the day the customer created their booking.
+        query = query.filter(
+            func.date(
+                EventSchedule.schedule_data["basic_details"]["start_datetime"].astext
+            ) == event_date
         )
 
-    return {
-        "total": total,
-        "page": page,
-        "limit": limit,
-        "bookings": bookings,
-    }
+    total = query.count()
+    offset = (page - 1) * limit
 
+    # Prioritize events that are currently live, then show the newest
+    # scheduled event first; booking creation time breaks ties.
+    live_state = func.lower(func.coalesce(Event.state, ""))
+    rows = query.order_by(
+        func.case(
+            (live_state.in_(["in progress", "launched now!", "live"]), 0),
+            else_=1,
+        ),
+        func.date(
+            EventSchedule.schedule_data["basic_details"]["start_datetime"].astext
+        ).desc().nullslast(),
+        Booking.created_at.desc(),
+    ).offset(offset).limit(limit).all()
+
+    bookings = []
+    for booking, payment_status_value, razorpay_order_id, razorpay_payment_id, event, user, schedule in rows:
+        schedule_data = (schedule.schedule_data if schedule else {}) or {}
+        basic = schedule_data.get("basic_details", {}) or {}
+        pickup = next(
+            (
+                item for item in (schedule_data.get("pickups", []) or [])
+                if str(item.get("pickup_uuid")) == str(booking.pickup_uuid)
+            ),
+            {},
+        )
+        bookings.append({
+            "booking_id": str(booking.booking_id),
+            "user_id": str(booking.user_id),
+            "user_name": " ".join(part for part in [user.first_name, user.last_name] if part).strip() if user else None,
+            "user_phone": user.phone if user else None,
+            "user_email": user.email if user else None,
+            "event_id": str(booking.event_id),
+            "event_title": event.title if event else "Deleted event",
+            "event_state": event.state if event else None,
+            "event_status": event.status if event else None,
+            "schedule_id": str(booking.schedule_id),
+            "event_start_datetime": basic.get("start_datetime"),
+            "event_end_datetime": basic.get("end_datetime"),
+            "event_location": event.location if event else None,
+            "pickup_uuid": booking.pickup_uuid,
+            "pickup_point": pickup.get("pickup_point"),
+            "pickup_city": pickup.get("city_name"),
+            "pickup_datetime": pickup.get("pickup_datetime"),
+            "number_of_people": booking.number_of_people,
+            "price_per_person": booking.price_per_person,
+            "subtotal": booking.subtotal,
+            "discount_label": booking.discount_label,
+            "discount_type": booking.discount_type,
+            "discount_scope": booking.discount_scope,
+            "discount_value": booking.discount_value,
+            "discount_amount": booking.discount_amount,
+            "final_amount": booking.final_amount,
+            "currency": booking.currency,
+            "booking_status": booking.booking_status,
+            "payment_status": payment_status_value or "UNKNOWN",
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_payment_id": razorpay_payment_id,
+            "payment_method": (
+                db.query(Payment.payment_method)
+                .filter(Payment.booking_id == booking.booking_id)
+                .scalar()
+            ),
+            "amount_paid": (
+                db.query(Payment.amount_paid)
+                .filter(Payment.booking_id == booking.booking_id)
+                .scalar()
+            ),
+            "paid_at": (
+                db.query(Payment.paid_at)
+                .filter(Payment.booking_id == booking.booking_id)
+                .scalar()
+            ),
+            "created_at": booking.created_at,
+            "updated_at": booking.updated_at,
+        })
+
+    return {"total": total, "page": page, "limit": limit, "bookings": bookings}
 
 def get_my_bookings(decoded: dict, db: Session):
     """Return the authenticated user's bookings with event and schedule details."""
