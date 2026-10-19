@@ -45,6 +45,7 @@ class AdminBookingOut(BaseModel):
     user_phone: Optional[str] = None
     user_email: Optional[str] = None
     event_id: UUID
+    event_internal_id: Optional[int] = None
     event_title: Optional[str] = None
     event_state: Optional[str] = None
     event_status: Optional[str] = None
