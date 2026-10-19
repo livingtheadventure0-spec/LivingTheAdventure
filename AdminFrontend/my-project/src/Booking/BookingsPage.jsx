@@ -233,6 +233,7 @@ export default function BookingsPage() {
                 <Detail label="Razorpay order ID" value={b.razorpay_order_id} mono/>
                 <Detail label="Razorpay payment ID" value={b.razorpay_payment_id} mono/>
               </div>
+              </>}
             </article>)}
           </div>}
         </section>;
