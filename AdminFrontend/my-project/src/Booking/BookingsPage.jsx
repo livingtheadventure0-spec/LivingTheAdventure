@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, RefreshCw, Download, CalendarDays, ExternalLink, MapPin, Users, CreditCard, ChevronDown } from "lucide-react";
 import API from "../api";
+import Navbar from "../components/Navbar/NavBar";
 
 const C = {
   cream: "#F3EFE3", card: "#FFFFFF", navy: "#1B2436", ink: "#20242F",
@@ -56,6 +57,8 @@ export default function BookingsPage() {
   const [paymentFilter, setPaymentFilter] = useState("All payments");
   const [eventDate, setEventDate] = useState("");
   const [sort, setSort] = useState("Event date: newest first");
+  const [expandedEvents, setExpandedEvents] = useState(() => new Set());
+  const [expandedBookings, setExpandedBookings] = useState(() => new Set());
 
   const loadBookings = useCallback(async (nextPage = 1) => {
     setLoading(true);
@@ -121,16 +124,16 @@ export default function BookingsPage() {
   const exportCSV = () => {
     if (!filtered.length) return;
     const headers = ["Event", "Event date", "Booking ID", "User name", "User ID", "Phone", "Email", "People", "Price per person", "Subtotal", "Discount label", "Discount amount", "Final amount", "Amount paid", "Currency", "Booking status", "Payment status", "Payment method", "Razorpay order ID", "Razorpay payment ID", "Booked at"];
-    const values = filtered.map(b => [b.event_title, b.event_start_datetime, b.booking_id, b.user_name, b.user_id, b.user_phone, b.user_email, b.number_of_people, b.price_per_person, b.subtotal, b.discount_label, b.discount_amount, b.final_amount, b.amount_paid, b.currency, b.booking_status, b.payment_status, b.payment_method, b.razorpay_order_id, b.razorpay_payment_id, b.created_at]);
+    const values = rows.map(b => [b.event_title, b.event_start_datetime, b.booking_id, b.user_name, b.user_id, b.user_phone, b.user_email, b.number_of_people, b.price_per_person, b.subtotal, b.discount_label, b.discount_amount, b.final_amount, b.amount_paid, b.currency, b.booking_status, b.payment_status, b.payment_method, b.razorpay_order_id, b.razorpay_payment_id, b.created_at]);
     const csv = [headers, ...values].map(row => row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
-    const a = document.createElement("a"); a.href = url; a.download = "event-bookings.csv"; a.click(); URL.revokeObjectURL(url);
+    const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
   };
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const userSite = "https://livingtheadventure.in";
 
-  return <div style={{ background: C.cream, minHeight: "100vh", padding: "clamp(18px, 3vw, 42px)", fontFamily: "Inter, system-ui, sans-serif", color: C.ink }}>
+  return <div style={{ background: C.cream, minHeight: "100vh", fontFamily: "Inter, system-ui, sans-serif", color: C.ink }}><Navbar /><main style={{ padding: "clamp(18px, 3vw, 42px)", maxWidth: 1600, margin: "0 auto" }}>
     <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap'); .booking-link:hover{opacity:.78;text-decoration:underline} .booking-input:focus,.booking-select:focus{outline:2px solid #B98A2E;outline-offset:1px} @media(max-width:700px){.booking-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}.booking-filters{grid-template-columns:1fr!important}.booking-card-grid{grid-template-columns:1fr!important}} `}</style>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "end", gap: 16, flexWrap: "wrap", marginBottom: 26 }}>
       <div><div style={{ fontSize: 11, letterSpacing: 2.5, color: C.gold, fontWeight: 800, marginBottom: 7 }}>BASECAMP · OPERATIONS</div><h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "clamp(30px,4vw,42px)", margin: 0, fontWeight: 600 }}>Event bookings</h1><p style={{ color: C.muted, margin: "8px 0 0", fontSize: 13 }}>Bookings grouped by event, with customer, discount and Razorpay details.</p></div>
@@ -153,6 +156,10 @@ export default function BookingsPage() {
       <FilterSelect value={paymentFilter} onChange={setPaymentFilter} options={paymentStatuses}/>
       <FilterSelect value={sort} onChange={setSort} options={["Event date: newest first","Event date: oldest first","Booking date: newest first","Amount: high to low","Amount: low to high"]}/>
     </div>
+    {groups.length > 0 && <section style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18,marginBottom:18}}>
+      <div style={{display:"flex",justifyContent:"space-between",gap:12,flexWrap:"wrap",marginBottom:14}}><div><h2 style={{margin:0,fontSize:16,color:C.navy}}>Collection by event</h2><p style={{margin:"4px 0 0",fontSize:12,color:C.muted}}>Successful payment totals for the events currently shown.</p></div><span style={{fontSize:12,color:C.muted}}>{groups.length} events</span></div>
+      <div style={{display:"grid",gap:12}}>{groups.slice(0,6).map(g=>{const paid=g.bookings.filter(b=>String(b.payment_status).toUpperCase()==="SUCCESS").reduce((n,b)=>n+Number(b.amount_paid??b.final_amount??0),0);const max=Math.max(1,...groups.map(x=>x.bookings.filter(b=>String(b.payment_status).toUpperCase()==="SUCCESS").reduce((n,b)=>n+Number(b.amount_paid??b.final_amount??0),0)));return <div key={g.key} style={{display:"grid",gridTemplateColumns:"minmax(130px,1fr) minmax(100px,3fr) auto",alignItems:"center",gap:12}}><span style={{fontSize:12,color:C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.event.event_title||"Untitled event"}</span><div style={{height:9,background:"#F0EEE9",borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(100,paid/max*100)}%`,background:C.gold,borderRadius:99}}/></div><strong style={{fontSize:12,whiteSpace:"nowrap"}}>{money(paid)}</strong></div>})}</div>
+    </section>}
     {eventDate && <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, fontSize: 13, color: C.muted }}>Showing events scheduled for <strong style={{color:C.ink}}>{dateOnly(eventDate)}</strong><button onClick={()=>setEventDate("")} style={{border:0,background:"transparent",color:C.gold,cursor:"pointer",fontWeight:700}}>Clear date</button></div>}
 
     {loading ? <div style={{ padding: 45, textAlign: "center", color: C.muted, background: C.card, borderRadius: 12 }}>Loading bookings…</div> : groups.length === 0 ? <div style={{ padding: 50, textAlign: "center", background: C.card, border: `1px solid ${C.border}`, borderRadius: 12 }}><CalendarDays size={28} color={C.muted}/><h3 style={{margin:"12px 0 5px"}}>No bookings found</h3><p style={{margin:0,color:C.muted,fontSize:13}}>Try another date or clear one of the filters.</p></div> : <div style={{display:"grid",gap:16}}>
