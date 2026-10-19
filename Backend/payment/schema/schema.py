@@ -41,10 +41,22 @@ class AdminBookingOut(BaseModel):
     booking_id: UUID
 
     user_id: UUID
+    user_name: Optional[str] = None
+    user_phone: Optional[str] = None
+    user_email: Optional[str] = None
     event_id: UUID
+    event_title: Optional[str] = None
+    event_state: Optional[str] = None
+    event_status: Optional[str] = None
+    event_start_datetime: Optional[str] = None
+    event_end_datetime: Optional[str] = None
+    event_location: Optional[str] = None
     schedule_id: UUID
 
     pickup_uuid: str
+    pickup_point: Optional[str] = None
+    pickup_city: Optional[str] = None
+    pickup_datetime: Optional[str] = None
 
     number_of_people: int
 
@@ -58,13 +70,16 @@ class AdminBookingOut(BaseModel):
     discount_amount: Optional[float] = None
 
     final_amount: float
+    amount_paid: Optional[float] = None
     currency: str
 
     booking_status: str
 
     payment_status: Optional[str] = None
+    payment_method: Optional[str] = None
     razorpay_order_id: Optional[str] = None
     razorpay_payment_id: Optional[str] = None
+    paid_at: Optional[datetime] = None
 
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
