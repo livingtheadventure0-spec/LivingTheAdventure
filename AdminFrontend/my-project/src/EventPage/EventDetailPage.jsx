@@ -140,6 +140,7 @@ export default function EventDetailPage() {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [deletingEvent, setDeletingEvent] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -167,6 +168,21 @@ export default function EventDetailPage() {
             cancelled = true;
         };
     }, [eventId]);
+
+    const handleDeleteEvent = async () => {
+        const title = event?.title || "this event";
+        if (!window.confirm("Delete \"" + title + "\"? All schedules attached to this event will also be deleted. This cannot be undone.")) return;
+
+        setDeletingEvent(true);
+        setError("");
+        try {
+            await API.delete("/events/" + event.id);
+            navigate("/admin/events", { replace: true });
+        } catch (err) {
+            setError(err.readableMessage || err.response?.data?.detail || err.response?.data?.message || "Could not delete this event.");
+            setDeletingEvent(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -233,6 +249,14 @@ export default function EventDetailPage() {
                             className="bg-[#1B222C] hover:bg-[#A9782F] text-[#F5F2E9] text-sm font-medium px-5 py-2.5 rounded-sm transition-colors"
                         >
                             Edit event
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleDeleteEvent}
+                            disabled={deletingEvent}
+                            className="border border-[#9C4A3C]/35 bg-white px-4 py-2.5 text-sm font-medium text-[#9C4A3C] rounded-sm transition-colors hover:bg-[#9C4A3C]/[0.06] disabled:opacity-50"
+                        >
+                            {deletingEvent ? "Deleting…" : "Delete event"}
                         </button>
                     </div>
                 </div>
