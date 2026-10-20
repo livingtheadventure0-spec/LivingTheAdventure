@@ -1,8 +1,9 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
+// Production uses the same-origin Vercel /api rewrite. Set VITE_API_BASE_URL for local development or a separately hosted backend.
 const API = axios.create({
-  baseURL: "https://living-the-adventure.vercel.app", // 🔥 replace
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
 });
 
 // Request Interceptor
