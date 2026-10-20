@@ -11,6 +11,7 @@ import ComingSoonPage from "./components/ComingSoonPage";
 import UsersListPage from "./Users/UsersListPage";
 import HeroManagementPage from "./Heroes/HeroManagementPage";
 import BookingsPage from "./Booking/BookingsPage";
+import LogsPage from "./Logs/LogsPage";
 
 
 
@@ -64,6 +65,12 @@ function App() {
         <Route path="/admin/events/:eventId" element={
           <ProtectedRoute>
             <EventDetailPage />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/admin/logs" element={
+          <ProtectedRoute>
+            <LogsPage />
           </ProtectedRoute>
         }
         />

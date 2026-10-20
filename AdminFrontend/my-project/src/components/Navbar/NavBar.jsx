@@ -23,6 +23,7 @@ const NAV_LINKS = [
     { label: "Guides", to: "/admin/guides" },
     { label: "Analytics", to: "/admin/analytics" },
     { label: "Users", to: "/admin/users" },
+    { label: "Logs", to: "/admin/logs" },
 ];
 
 function BellIcon() {
