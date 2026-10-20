@@ -1,35 +1,3 @@
-
-
-                                {eventSchedules.length > 1 && (
-                                    <section className="relative overflow-hidden rounded-3xl border border-white/[0.09] bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.22)] sm:p-6" aria-label="Choose departure date">
-                                        <div className="mb-5 flex items-start gap-3">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-300/20 bg-amber-300/10 text-amber-300"><span className="text-lg">▦</span></div>
-                                            <div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300">Plan your trip</p>
-                                            <h3 className="mt-1 text-xl font-semibold tracking-tight text-white">Choose a departure date</h3>
-                                            <p className="mt-1 max-w-xl text-sm leading-5 text-neutral-400">Select the trip date that works best for you.</p></div>
-                                        </div>
-                                        <div className="flex flex-wrap gap-3">
-                                            {eventSchedules.map((item) => {
-                                                const details = item.schedule_data?.basic_details || {};
-                                                const start = new Date(details.start_datetime);
-                                                const end = new Date(details.end_datetime);
-                                                const selected = item.schedule_id === eventSchedule?.schedule_id;
-                                                return (
-                                                    <button key={item.schedule_id || item.id} type="button"
-                                                        onClick={() => setEventSchedule(item)}
-                                                        aria-pressed={selected}
-                                                        className={`group relative min-w-[132px] overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${selected ? "border-amber-300/90 bg-amber-300/[0.09] shadow-[0_8px_25px_rgba(251,191,36,0.08)]" : "border-white/[0.12] bg-white/[0.025] hover:border-white/30 hover:bg-white/[0.05]"}`}>
-                                                        {selected && <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_12px_rgba(252,211,77,0.6)]" />}
-                                                        <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{start.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</span>
-                                                        <span className="mt-2 block text-2xl font-bold tracking-tight text-white">{start.toLocaleDateString("en-IN", { day: "2-digit" })}</span>
-                                                        <span className="mt-0.5 block text-sm font-medium text-neutral-200">{start.toLocaleDateString("en-IN", { weekday: "short", month: "short" })}</span>
-                                                        <span className="mt-3 flex items-center gap-1.5 border-t border-white/10 pt-2 text-xs text-neutral-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />{Math.max(1, Math.round((end - start) / 86400000))} day trip</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </section>
-                                )}om "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Spinner from "../Spinner/Spinner.jsx";
@@ -772,6 +740,37 @@ function EventDetail() {
                                     }
 
                                 />
+
+                                {eventSchedules.length > 1 && (
+                                    <section className="relative overflow-hidden rounded-3xl border border-white/[0.09] bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 p-5 shadow-[0_18px_55px_rgba(0,0,0,0.22)] sm:p-6" aria-label="Choose departure date">
+                                        <div className="mb-5 flex items-start gap-3">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-300/20 bg-amber-300/10 text-amber-300"><span className="text-lg">▦</span></div>
+                                            <div><p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-300">Plan your trip</p>
+                                            <h3 className="mt-1 text-xl font-semibold tracking-tight text-white">Choose a departure date</h3>
+                                            <p className="mt-1 max-w-xl text-sm leading-5 text-neutral-400">Select the trip date that works best for you.</p></div>
+                                        </div>
+                                        <div className="flex flex-wrap gap-3">
+                                            {eventSchedules.map((item) => {
+                                                const details = item.schedule_data?.basic_details || {};
+                                                const start = new Date(details.start_datetime);
+                                                const end = new Date(details.end_datetime);
+                                                const selected = item.schedule_id === eventSchedule?.schedule_id;
+                                                return (
+                                                    <button key={item.schedule_id || item.id} type="button"
+                                                        onClick={() => setEventSchedule(item)}
+                                                        aria-pressed={selected}
+                                                        className={`group relative min-w-[132px] overflow-hidden rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${selected ? "border-amber-300/90 bg-amber-300/[0.09] shadow-[0_8px_25px_rgba(251,191,36,0.08)]" : "border-white/[0.12] bg-white/[0.025] hover:border-white/30 hover:bg-white/[0.05]"}`}>
+                                                        {selected && <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_12px_rgba(252,211,77,0.6)]" />}
+                                                        <span className="block text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">{start.toLocaleDateString("en-IN", { month: "long", year: "numeric" })}</span>
+                                                        <span className="mt-2 block text-2xl font-bold tracking-tight text-white">{start.toLocaleDateString("en-IN", { day: "2-digit" })}</span>
+                                                        <span className="mt-0.5 block text-sm font-medium text-neutral-200">{start.toLocaleDateString("en-IN", { weekday: "short", month: "short" })}</span>
+                                                        <span className="mt-3 flex items-center gap-1.5 border-t border-white/10 pt-2 text-xs text-neutral-400"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />{Math.max(1, Math.round((end - start) / 86400000))} day trip</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </section>
+                                )}
 
 
                                 {/* ================================= */}
