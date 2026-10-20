@@ -71,7 +71,8 @@ const STATE_STYLES = {
 const TYPE_LABELS = {
     trek: "Trek",
     adventure: "Adventure",
-    trip: "Trip",
+    // UI copy change: display "Tour" while retaining the API event_type value "trip".
+    trip: "Tour",
     peak: "Peak",
     "special event": "Special Event",
     unknown: "Other",
