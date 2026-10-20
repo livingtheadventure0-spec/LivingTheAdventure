@@ -409,7 +409,7 @@ function EventDetail() {
                                                     </svg>
                                                 </span>
                                                 <span className="min-w-0 flex-1">
-                                                    <span className="block break-words text-sm font-semibold leading-5 text-white sm:text-[15px]">
+                                                    <span className="block break-words text-sm font-normal leading-5 text-white sm:text-[15px]">
                                                         {hasDescription ? title : highlight.trim()}
                                                     </span>
                                                     {hasDescription && (
