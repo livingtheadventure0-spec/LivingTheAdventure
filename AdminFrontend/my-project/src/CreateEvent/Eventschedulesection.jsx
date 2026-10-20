@@ -40,6 +40,21 @@ function emptyPickup(order) {
     };
 }
 
+const EMPTY_ITINERARY_DAY = (day = 1) => ({ day, title: "", description: "" });
+
+// Schedule-specific itinerary editor. Keep the existing extra_options.itinerary API field
+// so older schedules and backend contracts remain compatible.
+function parseScheduleItinerary(value) {
+    if (Array.isArray(value)) return value.map((item, index) => ({ ...EMPTY_ITINERARY_DAY(index + 1), ...(item || {}), day: index + 1 }));
+    if (typeof value !== "string" || !value.trim()) return [EMPTY_ITINERARY_DAY()];
+    try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed.map((item, index) => ({ ...EMPTY_ITINERARY_DAY(index + 1), ...(item || {}), day: index + 1 }));
+    } catch {
+        // Preserve compatibility with older plain-text itinerary values.
+    }
+    return value.split(/[;\n]+/).map((line) => line.trim()).filter(Boolean).map((line, index) => ({ ...EMPTY_ITINERARY_DAY(index + 1), title: line }));
+}
 function emptyScheduleForm() {
     return {
         status: "active",
@@ -344,7 +359,17 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
                     max_participants: Number(form.capacity_pricing.max_participants) || 0,
                     base_price_per_person: Number(form.capacity_pricing.base_price_per_person) || 0,
                 },
-                extra_options: { ...form.extra_options },
+                // Store only completed itinerary days; an empty departure itinerary stays empty
+                // so legacy events can continue using their general itinerary as a fallback.
+                extra_options: {
+                    ...form.extra_options,
+                    itinerary: (() => {
+                        const days = parseScheduleItinerary(form.extra_options.itinerary)
+                            .filter((day) => (day.title || "").trim() || (day.description || "").trim())
+                            .map((day, index) => ({ day: index + 1, title: (day.title || "").trim(), description: (day.description || "").trim() }));
+                        return days.length ? JSON.stringify(days) : "";
+                    })(),
+                },
                 pickups: form.pickups.map((p, i) => ({
                     ...p,
                     order_number: i + 1,
@@ -511,13 +536,30 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
                     onChange={setExtraList("exclusions")}
                     placeholder="Personal Expenses"
                 />
-                <Field label="Itinerary for this departure" full>
-                    <textarea
-                        value={form.extra_options.itinerary}
-                        onChange={setExtra("itinerary")}
-                        placeholder={"Day 1: Departure and arrival details...\nDay 2: Activities and return..."}
-                        className={textareaClass}
-                    />
+                <Field label="Tour itinerary for this departure" full>
+                    <div className="rounded-md border border-[#1B222C]/10 bg-[#F9F7F1] p-4 md:p-5">
+                        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-[#1B222C]">Plan this specific departure</p>
+                                <p className="mt-1 text-xs leading-5 text-[#6E6A5E]">Each departure can have its own day-by-day plan. If left empty, the event’s general itinerary remains the fallback for older events.</p>
+                            </div>
+                            <button type="button" onClick={() => { const days = parseScheduleItinerary(form.extra_options.itinerary); setExtra("itinerary")({ target: { value: JSON.stringify([...days, EMPTY_ITINERARY_DAY(days.length + 1)]) } }); }} className="shrink-0 rounded-sm border border-[#A9782F]/40 px-3 py-2 text-xs font-medium text-[#8A641F] hover:bg-[#A9782F]/[0.08]">+ Add itinerary day</button>
+                        </div>
+                        <div className="space-y-3">
+                            {parseScheduleItinerary(form.extra_options.itinerary).map((day, index, days) => (
+                                <div key={index} className="rounded-md border border-[#1B222C]/10 bg-white p-3 md:p-4">
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[#8A641F]">Day {index + 1}</span>
+                                        <button type="button" disabled={days.length === 1} onClick={() => { const next = days.filter((_, dayIndex) => dayIndex !== index).map((item, dayIndex) => ({ ...item, day: dayIndex + 1 })); setExtra("itinerary")({ target: { value: JSON.stringify(next) } }); }} className="text-xs font-medium text-[#9C4A3C] disabled:cursor-not-allowed disabled:opacity-40">Remove day</button>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <input value={day.title || ""} onChange={(event) => { const next = days.map((item, dayIndex) => dayIndex === index ? { ...item, title: event.target.value } : item); setExtra("itinerary")({ target: { value: JSON.stringify(next) } }); }} placeholder="Day title (e.g. Trek begins)" className={inputClass} />
+                                        <textarea value={day.description || ""} onChange={(event) => { const next = days.map((item, dayIndex) => dayIndex === index ? { ...item, description: event.target.value } : item); setExtra("itinerary")({ target: { value: JSON.stringify(next) } }); }} placeholder="Describe timings, activities, meals and travel details for this day..." className={textareaClass} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </Field>
                 <Field label="Custom notes">
                     <textarea
