@@ -13,6 +13,8 @@ from admin.api.api import router as admin_router
 from upload.api import router as upload_router
 from metadata.api.api import router as metadata_router
 from payment.api.api import router as payment_router
+from logs.api.api import router as logs_router
+from logs.model.model import SystemLogs  # noqa: F401 - register audit log table
 
 Base.metadata.create_all(bind=engine)
 
@@ -47,6 +49,7 @@ app.include_router(favourite_router)
 app.include_router(upload_router)
 app.include_router(metadata_router)
 app.include_router(payment_router)
+app.include_router(logs_router)
 
 
 @app.get("/")
