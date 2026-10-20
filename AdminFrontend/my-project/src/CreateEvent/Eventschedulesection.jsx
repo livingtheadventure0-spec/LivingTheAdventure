@@ -45,7 +45,7 @@ function emptyScheduleForm() {
         status: "active",
         basic_details: { start_datetime: "", end_datetime: "", duration_days: "", timezone: "Asia/Kolkata" },
         capacity_pricing: { base_price_per_person: "", max_participants: "", seats_available: "", currency: "INR" },
-        extra_options: { inclusions: [], exclusions: [], custom_notes: "" },
+        extra_options: { inclusions: [], exclusions: [], custom_notes: "", itinerary: "" },
         pickups: [],
     };
 }
@@ -282,7 +282,7 @@ function formFromSchedule(schedule) {
         status: schedule?.status || "active",
         basic_details: { ...emptyScheduleForm().basic_details, ...basic, start_datetime: toDateTimeInput(basic.start_datetime), end_datetime: toDateTimeInput(basic.end_datetime), duration_days: basic.duration_days ?? "" },
         capacity_pricing: { ...emptyScheduleForm().capacity_pricing, ...capacity, base_price_per_person: capacity.base_price_per_person ?? "", max_participants: capacity.max_participants ?? "", seats_available: capacity.seats_available ?? "" },
-        extra_options: { ...emptyScheduleForm().extra_options, ...extra, inclusions: Array.isArray(extra.inclusions) ? extra.inclusions : [], exclusions: Array.isArray(extra.exclusions) ? extra.exclusions : [] },
+        extra_options: { ...emptyScheduleForm().extra_options, ...extra, inclusions: Array.isArray(extra.inclusions) ? extra.inclusions : [], exclusions: Array.isArray(extra.exclusions) ? extra.exclusions : [], itinerary: extra.itinerary || "" },
         pickups: Array.isArray(data.pickups) ? data.pickups.map((pickup, index) => ({
             ...emptyPickup(index + 1), ...pickup, pickup_datetime: toDateTimeInput(pickup.pickup_datetime), price_per_person: pickup.price_per_person ?? "",
             address: { ...emptyAddress(), ...(pickup.address || {}) },
@@ -320,6 +320,14 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
         e.preventDefault();
         setError("");
         setSubmitting(true);
+
+        const startTime = new Date(form.basic_details.start_datetime).getTime();
+        const endTime = new Date(form.basic_details.end_datetime).getTime();
+        if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) {
+            setError("Please enter a valid start and end date/time. The end must be on or after the start.");
+            setSubmitting(false);
+            return;
+        }
 
         const payload = {
             event_id: eventId,
@@ -503,6 +511,14 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
                     onChange={setExtraList("exclusions")}
                     placeholder="Personal Expenses"
                 />
+                <Field label="Itinerary for this departure" full>
+                    <textarea
+                        value={form.extra_options.itinerary}
+                        onChange={setExtra("itinerary")}
+                        placeholder={"Day 1: Departure and arrival details...\nDay 2: Activities and return..."}
+                        className={textareaClass}
+                    />
+                </Field>
                 <Field label="Custom notes">
                     <textarea
                         value={form.extra_options.custom_notes}
