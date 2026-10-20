@@ -647,7 +647,7 @@ function EventDetail() {
 
             <Itinerary
                 itinerary={
-                    event.itinerary
+                    eventSchedule?.schedule_data?.extra_options?.itinerary || eventSchedule?.schedule_data?.itinerary || event.itinerary
                 }
 
                 gallery_image_urls={
