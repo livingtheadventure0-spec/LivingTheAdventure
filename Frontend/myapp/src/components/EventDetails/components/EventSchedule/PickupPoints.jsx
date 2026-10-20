@@ -119,15 +119,10 @@ function PickupPoints({
                                 ">
                                     <MdOutlineAccessTime />
 
-                                    {new Date(
-                                        pickup.pickup_datetime
-                                    ).toLocaleTimeString(
-                                        [],
-                                        {
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        }
-                                    )}
+                                    {new Date(pickup.pickup_datetime).toLocaleString("en-IN", {
+                                        day: "2-digit", month: "short", year: "numeric",
+                                        hour: "2-digit", minute: "2-digit",
+                                    })}
                                 </span>
 
 
