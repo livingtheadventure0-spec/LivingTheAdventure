@@ -383,21 +383,44 @@ function EventDetail() {
                             at a glance
                         </p>
 
-                        {Array.isArray(event.highlights) && event.highlights.length > 0 && (
+                        {Array.isArray(event.highlights) && event.highlights.some((highlight) => typeof highlight === "string" && highlight.trim()) && (
                             <ul
                                 aria-label="Event highlights"
-                                className="mt-5 flex flex-wrap justify-center gap-2"
+                                className="mx-auto mt-7 grid w-full max-w-6xl grid-cols-1 gap-3 text-left sm:grid-cols-2 xl:grid-cols-3"
                             >
                                 {event.highlights
                                     .filter((highlight) => typeof highlight === "string" && highlight.trim())
-                                    .map((highlight) => (
-                                        <li
-                                            key={highlight}
-                                            className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-gray-100"
-                                        >
-                                            {highlight.trim()}
-                                        </li>
-                                    ))}
+                                    .map((highlight) => {
+                                        const [title, ...descriptionParts] = highlight.trim().split(/:\\s*/);
+                                        const description = descriptionParts.join(": ").trim();
+                                        const hasDescription = description.length > 0;
+
+                                        return (
+                                            <li
+                                                key={highlight}
+                                                className="group flex min-w-0 items-start gap-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.025] p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-amber-300/30 hover:bg-white/[0.08] sm:p-5"
+                                            >
+                                                <span
+                                                    aria-hidden="true"
+                                                    className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-amber-300/20 bg-amber-300/10 text-amber-200"
+                                                >
+                                                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
+                                                        <path d="m12 3 2.2 5.1L20 10l-4.4 3.5.2 5.8L12 16.4 6.2 19.3l.9-5.8L3 10l5.8-1.9L12 3Z" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </span>
+                                                <span className="min-w-0 flex-1">
+                                                    <span className="block break-words text-sm font-semibold leading-5 text-white sm:text-[15px]">
+                                                        {hasDescription ? title : highlight.trim()}
+                                                    </span>
+                                                    {hasDescription && (
+                                                        <span className="mt-1.5 block break-words text-xs leading-5 text-neutral-400 sm:text-sm">
+                                                            {description}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </li>
+                                        );
+                                    })}
                             </ul>
                         )}
 
