@@ -383,6 +383,24 @@ function EventDetail() {
                             at a glance
                         </p>
 
+                        {Array.isArray(event.highlights) && event.highlights.length > 0 && (
+                            <ul
+                                aria-label="Event highlights"
+                                className="mt-5 flex flex-wrap justify-center gap-2"
+                            >
+                                {event.highlights
+                                    .filter((highlight) => typeof highlight === "string" && highlight.trim())
+                                    .map((highlight) => (
+                                        <li
+                                            key={highlight}
+                                            className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-gray-100"
+                                        >
+                                            {highlight.trim()}
+                                        </li>
+                                    ))}
+                            </ul>
+                        )}
+
                     </div>
 
 
