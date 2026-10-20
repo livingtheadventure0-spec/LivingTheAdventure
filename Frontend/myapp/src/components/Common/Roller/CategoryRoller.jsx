@@ -42,7 +42,7 @@ const CategoryRoller = ({ title, items = [], favourites, onToggleFavourite }) =>
         "
             >
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white capitalize">
-                    {title}
+                    {displayTitle}
                 </h2>
 
                 <a href={route}>
