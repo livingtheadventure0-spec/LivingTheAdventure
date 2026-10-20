@@ -5,6 +5,8 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from event.model.model import Event
+from favourite.model.model import Favourite
+from schedule.model.model import EventSchedule
 from event.schema.schema import EventCreate, EventOut, EventUpdate
 from upload.s3 import private_media_url
 
@@ -80,6 +82,15 @@ def update_event(db: Session, db_obj: Event, event_in: EventUpdate):
 
 
 def delete_event(db: Session, db_obj: Event):
+    # Clear every user's saved favourite for this event and remove its
+    # schedules in the same transaction before deleting the event itself.
+    # Deleting a schedule on its own does not affect favourites or its parent event.
+    db.query(Favourite).filter(
+        Favourite.event_id == db_obj.event_id
+    ).delete(synchronize_session=False)
+    db.query(EventSchedule).filter(
+        EventSchedule.event_id == db_obj.event_id
+    ).delete(synchronize_session=False)
     db.delete(db_obj)
     db.commit()
 
