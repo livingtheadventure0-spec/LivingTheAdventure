@@ -43,8 +43,8 @@ function EventDetail() {
 
     const [event, setEvent] = useState(null);
 
-    const [eventSchedule, setEventSchedule] =
-        useState(null);
+    const [eventSchedule, setEventSchedule] = useState(null);
+    const [eventSchedules, setEventSchedules] = useState([]);
 
     const [loadingEvent, setLoadingEvent] =
         useState(true);
@@ -178,24 +178,23 @@ function EventDetail() {
                  * }
                  */
 
-                const schedule =
-                    Array.isArray(data)
-                        ? data.find((item) => item && typeof item === "object")
-                        : data;
+                // Keep every valid, active future departure so customers can book different dates.
+                // Each EventSchedule keeps its own capacity, pickup times, prices and itinerary.
+                const now = Date.now();
+                const schedules = (Array.isArray(data) ? data : [data])
+                    .filter((item) => {
+                        const scheduleData = item?.schedule_data || {};
+                        const basic = scheduleData.basic_details || {};
+                        const start = new Date(basic.start_datetime).getTime();
+                        const end = new Date(basic.end_datetime).getTime();
+                        const active = !item?.status || item.status.toLowerCase() === "active";
+                        return active && Number.isFinite(start) && Number.isFinite(end) && end >= now;
+                    })
+                    .sort((a, b) => new Date(a.schedule_data.basic_details.start_datetime) - new Date(b.schedule_data.basic_details.start_datetime));
 
-                // A schedule record can exist even when its details are not
-                // configured. Only show booking UI when valid dates are present.
-                const scheduleData = schedule?.schedule_data || {};
-                const basicDetails = scheduleData.basic_details || {};
-                const startDate = basicDetails.start_datetime;
-                const endDate = basicDetails.end_datetime;
-                const hasValidScheduleDates =
-                    Boolean(startDate && endDate) &&
-                    !Number.isNaN(new Date(startDate).getTime()) &&
-                    !Number.isNaN(new Date(endDate).getTime());
-
-                setEventSchedule(
-                    hasValidScheduleDates ? schedule : null
+                setEventSchedules(schedules);
+                setEventSchedule((current) =>
+                    schedules.find((item) => item.schedule_id === current?.schedule_id) || schedules[0] || null
                 );
 
 
@@ -718,6 +717,35 @@ function EventDetail() {
                                         </p>
                                     </div>
                                 </div>
+
+                                {eventSchedules.length > 1 && (
+                                    <section className="rounded-2xl border border-white/10 bg-neutral-900/70 p-5" aria-label="Choose departure date">
+                                        <div className="mb-4">
+                                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">Choose your departure</p>
+                                            <h3 className="mt-1 text-xl font-semibold text-white">Upcoming dates</h3>
+                                            <p className="mt-1 text-sm text-neutral-400">Each departure has its own itinerary, pickup times, pricing and seat availability.</p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-3">
+                                            {eventSchedules.map((item) => {
+                                                const details = item.schedule_data?.basic_details || {};
+                                                const start = new Date(details.start_datetime);
+                                                const end = new Date(details.end_datetime);
+                                                const selected = item.schedule_id === eventSchedule?.schedule_id;
+                                                return (
+                                                    <button key={item.schedule_id || item.id} type="button"
+                                                        onClick={() => setEventSchedule(item)}
+                                                        aria-pressed={selected}
+                                                        className={`min-w-[145px] rounded-xl border px-4 py-3 text-left transition ${selected ? "border-amber-300 bg-amber-300/10 ring-1 ring-amber-300/40" : "border-white/15 bg-white/[0.03] hover:border-white/35"}`}>
+                                                        <span className="block text-xs uppercase tracking-wide text-neutral-400">{start.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}</span>
+                                                        <span className="mt-1 block text-lg font-semibold text-white">{start.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
+                                                        <span className="mt-1 block text-xs text-neutral-300">{start.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} departure</span>
+                                                        <span className="mt-2 block text-xs text-neutral-400">Until {end.toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </section>
+                                )}
 
                                 <ScheduleHeader
 
