@@ -56,7 +56,8 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
             <style>{`.itinerary-scrollbar-hidden { scrollbar-width: none; -ms-overflow-style: none; } .itinerary-scrollbar-hidden::-webkit-scrollbar { display: none; }`}</style>
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                 <header className="mb-8 text-center sm:mb-12">
-                    <h2 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">Trip Itinerary</h2>
+                    {/* UI copy change: "Tour itinerary"; itinerary data shape and behavior remain unchanged. */}
+                    <h2 className="text-2xl font-semibold text-white sm:text-3xl lg:text-4xl">Tour Itinerary</h2>
                     <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-neutral-400 sm:text-base">
                         A day-by-day plan for your adventure
                     </p>
@@ -66,7 +67,7 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                     {days.length > 0 && (
                         <div
                             className={`min-w-0 space-y-4 ${hasItineraryAndGallery ? "lg:h-[42rem] lg:overflow-y-auto lg:overscroll-contain lg:pr-3 itinerary-scrollbar-hidden" : ""}`}
-                            aria-label={hasItineraryAndGallery ? "Scrollable trip itinerary" : undefined}
+                            aria-label={hasItineraryAndGallery ? "Scrollable tour itinerary" : undefined}
                             tabIndex={hasItineraryAndGallery ? 0 : undefined}
                         >
                             {days.map((day, index) => {
@@ -105,6 +106,7 @@ const Itinerary = ({ itinerary, gallery_image_urls }) => {
                             {galleryImages.slice(0, 4).map((url, index) => (
                                 <button key={url} type="button" onClick={() => setSelectedImage({ url, index })} aria-label={`View photo ${index + 1} of ${galleryImages.length}`} className="group relative aspect-[4/4.5] min-w-0 overflow-hidden rounded-xl bg-neutral-900 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:aspect-auto lg:min-h-0">
                                     <img src={url} alt={`Trip gallery photo ${index + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                    <img src={url} alt={`Tour gallery photo ${index + 1}`} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                     {index === 3 && galleryImages.length > 4 && <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/65 text-center text-white"><span className="text-2xl font-semibold">+{galleryImages.length - 4}</span><span className="text-sm font-medium">See all photos</span></span>}
                                 </button>

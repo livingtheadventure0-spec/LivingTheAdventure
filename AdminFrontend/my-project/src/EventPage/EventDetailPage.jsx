@@ -11,7 +11,8 @@ const EASE = [0.16, 1, 0.3, 1];
 const TYPE_LABELS = {
     trek: "Trek",
     adventure: "Adventure",
-    trip: "Trip",
+    // UI copy change: display "Tour" while retaining the API event_type value "trip".
+    trip: "Tour",
     peak: "Peak",
     special_event: "Special Event",
 };

@@ -231,7 +231,8 @@ export default function DashboardPage() {
 
     const typeStats = [
         { key: "trek_events", label: "Trek" },
-        { key: "trip_events", label: "Trip" },
+        // UI copy change: "Tour" is the display label; analytics key remains trip_events.
+        { key: "trip_events", label: "Tour" },
         { key: "adventure_events", label: "Adventure" },
         { key: "peak_events", label: "Peak" },
         { key: "special_events", label: "Special Event" },
