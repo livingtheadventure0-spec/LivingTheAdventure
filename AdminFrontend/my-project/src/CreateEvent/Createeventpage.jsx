@@ -268,9 +268,9 @@ export default function CreateEventPage() {
                         </Field>
 
                         <Field label="Event type">
+                            {/* UI copy change: show "tour" to admins while storing the legacy "trip" value for API compatibility. */}
                             <input
                                 list="event-type-options"
-                                // UI copy change: show "tour" to admins while storing the legacy "trip" value for API compatibility.
                                 value={form.event_type === "trip" ? "tour" : form.event_type}
                                 onChange={(event) => setForm((current) => ({ ...current, event_type: event.target.value.trim().toLowerCase() === "tour" ? "trip" : event.target.value }))}
                                 placeholder="trek"
