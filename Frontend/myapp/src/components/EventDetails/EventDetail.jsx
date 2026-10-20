@@ -383,45 +383,45 @@ function EventDetail() {
                             at a glance
                         </p>
 
+                        {/* UI refinement: keep every highlight inside one polished panel instead of separate cards. */}
                         {Array.isArray(event.highlights) && event.highlights.some((highlight) => typeof highlight === "string" && highlight.trim()) && (
-                            <ul
+                            <div
                                 aria-label="Event highlights"
-                                className="mx-auto mt-7 grid w-full max-w-6xl grid-cols-1 gap-3 text-left sm:grid-cols-2 xl:grid-cols-3"
+                                className="mx-auto mt-7 w-full max-w-5xl rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.025] px-5 py-6 text-left shadow-lg shadow-black/10 sm:px-8 sm:py-8"
                             >
-                                {event.highlights
-                                    .filter((highlight) => typeof highlight === "string" && highlight.trim())
-                                    .map((highlight) => {
-                                        const [title, ...descriptionParts] = highlight.trim().split(/:\\s*/);
-                                        const description = descriptionParts.join(": ").trim();
-                                        const hasDescription = description.length > 0;
+                                <ul className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+                                    {event.highlights
+                                        .filter((highlight) => typeof highlight === "string" && highlight.trim())
+                                        .map((highlight) => {
+                                            const [title, ...descriptionParts] = highlight.trim().split(/:\\s*/);
+                                            const description = descriptionParts.join(": ").trim();
+                                            const hasDescription = description.length > 0;
 
-                                        return (
-                                            <li
-                                                key={highlight}
-                                                className="group flex min-w-0 items-start gap-3 rounded-xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.025] p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-amber-300/30 hover:bg-white/[0.08] sm:p-5"
-                                            >
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-amber-300/20 bg-amber-300/10 text-amber-200"
-                                                >
-                                                    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
-                                                        <path d="m12 3 2.2 5.1L20 10l-4.4 3.5.2 5.8L12 16.4 6.2 19.3l.9-5.8L3 10l5.8-1.9L12 3Z" strokeLinecap="round" strokeLinejoin="round" />
-                                                    </svg>
-                                                </span>
-                                                <span className="min-w-0 flex-1">
-                                                    <span className="block break-words text-sm font-normal leading-5 text-white sm:text-[15px]">
-                                                        {hasDescription ? title : highlight.trim()}
+                                            return (
+                                                <li key={highlight} className="flex min-w-0 items-start gap-3">
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-300/10 text-amber-200"
+                                                    >
+                                                        <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4" stroke="currentColor" strokeWidth="1.8">
+                                                            <path d="m12 3 2.2 5.1L20 10l-4.4 3.5.2 5.8L12 16.4 6.2 19.3l.9-5.8L3 10l5.8-1.9L12 3Z" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
                                                     </span>
-                                                    {hasDescription && (
-                                                        <span className="mt-1.5 block break-words text-xs leading-5 text-neutral-400 sm:text-sm">
-                                                            {description}
+                                                    <span className="min-w-0 flex-1">
+                                                        <span className="block break-words text-sm font-normal leading-6 text-neutral-100 sm:text-[15px]">
+                                                            {hasDescription ? title : highlight.trim()}
                                                         </span>
-                                                    )}
-                                                </span>
-                                            </li>
-                                        );
-                                    })}
-                            </ul>
+                                                        {hasDescription && (
+                                                            <span className="mt-0.5 block break-words text-sm leading-6 text-neutral-400">
+                                                                {description}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
+                                </ul>
+                            </div>
                         )}
 
                     </div>
