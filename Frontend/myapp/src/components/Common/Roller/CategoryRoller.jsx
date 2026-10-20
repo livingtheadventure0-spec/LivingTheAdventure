@@ -25,6 +25,8 @@ const CategoryRoller = ({ title, items = [], favourites, onToggleFavourite }) =>
             route = `/${eventType}/${stateSlug}`;
         }
     }
+    // UI copy change: normalize legacy category titles for display only; keep existing route keys.
+    const displayTitle = ["trip", "trips"].includes((title || "").trim().toLowerCase()) ? "Tours" : title;
     const scrollRef = useRef(null);
 
     if (!items.length) return null;
