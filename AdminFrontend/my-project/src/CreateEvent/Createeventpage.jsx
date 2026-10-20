@@ -12,7 +12,8 @@ const STATE_SUGGESTIONS = ["Upcoming", "Launched Now!", "In Progress", "Complete
 const LABEL_SUGGESTIONS = [
     "Trek",
     "Adventure Activity",
-    "Trip",
+    // UI copy change: show "Tour" to admins; keep the underlying event type as "trip".
+    "Tour",
     "Special Event",
     "Best Of The Year",
     "Popular",
@@ -439,7 +440,8 @@ export default function CreateEventPage() {
                                 className={textareaClass}
                             />
                         </Field>
-                        <Field label="Trip itinerary" full>
+                        {/* UI copy change: use "Tour itinerary" in the admin editor; data field remains unchanged. */}
+                        <Field label="Tour itinerary" full>
                             <div className="space-y-4">
                                 <p className="text-sm leading-6 text-[#6E6A5E]">Add one card for each day. Add a title and describe the plan for that day. The website will display each day separately.</p>
                                 {form.itinerary.map((day, index) => (
