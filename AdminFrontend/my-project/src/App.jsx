@@ -10,6 +10,7 @@ import DashboardPage from "./Dashboard/Dashboard";
 import ComingSoonPage from "./components/ComingSoonPage";
 import UsersListPage from "./Users/UsersListPage";
 import HeroManagementPage from "./Heroes/HeroManagementPage";
+import BookingsPage from "./Booking/BookingsPage";
 
 
 
@@ -68,7 +69,7 @@ function App() {
         />
         <Route path="/admin/bookings" element={
           <ProtectedRoute>
-            <ComingSoonPage pageName="Bookings" />
+            <BookingsPage />
           </ProtectedRoute>
         }
         />

@@ -170,6 +170,11 @@ def list_all_bookings(
         None,
         description="Filter by payment status",
     ),
+    event_date: str | None = Query(
+        None,
+        pattern=r"^\d{4}-\d{2}-\d{2}$",
+        description="Filter by the event schedule start date (YYYY-MM-DD)",
+    ),
     db: Session = Depends(get_db),
     admin_id: str = Depends(get_current_admin),
 ):
@@ -179,6 +184,7 @@ def list_all_bookings(
         limit=limit,
         booking_status=booking_status,
         payment_status=payment_status,
+        event_date=event_date,
     )
 
 
