@@ -641,19 +641,7 @@ function EventDetail() {
             </section>
 
 
-            {/* ================================================= */}
-            {/* ITINERARY */}
-            {/* ================================================= */}
 
-            <Itinerary
-                itinerary={
-                    eventSchedule?.schedule_data?.extra_options?.itinerary || eventSchedule?.schedule_data?.itinerary || event.itinerary
-                }
-
-                gallery_image_urls={
-                    event.gallery_image_urls || []
-                }
-            />
 
 
             {/* ================================================= */}
@@ -825,6 +813,20 @@ function EventDetail() {
                 </div>
 
             </section>
+
+            {/* ================================================= */}
+            {/* ITINERARY */}
+            {/* ================================================= */}
+
+            <Itinerary
+                itinerary={
+                    eventSchedule?.schedule_data?.extra_options?.itinerary || eventSchedule?.schedule_data?.itinerary || event.itinerary
+                }
+
+                gallery_image_urls={
+                    event.gallery_image_urls || []
+                }
+            />
 
             {/* Policies are intentionally placed after booking so guests can
                 review the essentials after seeing the booking options. */}
