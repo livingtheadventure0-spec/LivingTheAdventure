@@ -41,8 +41,9 @@ function NavBar() {
                 <a href="/" aria-label="Home" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
                     <NavLink icon={<FaHome className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Home" />
                 </a>
-                <a href="/trips" aria-label="Trips" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
-                    <NavLink icon={<FaSuitcaseRolling className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Trips" />
+                {/* UI copy change: navigation says "Tours"; legacy /trips route remains unchanged. */}
+                <a href="/trips" aria-label="Tours" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
+                    <NavLink icon={<FaSuitcaseRolling className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Tours" />
                 </a>
                 <a href="/treks" aria-label="Treks" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
                     <NavLink icon={<FaHiking className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Treks" />
