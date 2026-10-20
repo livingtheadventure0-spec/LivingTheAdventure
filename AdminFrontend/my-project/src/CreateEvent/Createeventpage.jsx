@@ -270,14 +270,15 @@ export default function CreateEventPage() {
                         <Field label="Event type">
                             <input
                                 list="event-type-options"
-                                value={form.event_type}
-                                onChange={set("event_type")}
+                                // UI copy change: show "tour" to admins while storing the legacy "trip" value for API compatibility.
+                                value={form.event_type === "trip" ? "tour" : form.event_type}
+                                onChange={(event) => setForm((current) => ({ ...current, event_type: event.target.value.trim().toLowerCase() === "tour" ? "trip" : event.target.value }))}
                                 placeholder="trek"
                                 className={inputClass}
                             />
                             <datalist id="event-type-options">
                                 {EVENT_TYPE_OPTIONS.map((t) => (
-                                    <option key={t} value={t} />
+                                    <option key={t} value={t === "trip" ? "tour" : t} />
                                 ))}
                             </datalist>
                         </Field>
