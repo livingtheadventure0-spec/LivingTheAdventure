@@ -359,7 +359,17 @@ function ScheduleForm({ onCancel, onSaved, eventId, schedule = null }) {
                     max_participants: Number(form.capacity_pricing.max_participants) || 0,
                     base_price_per_person: Number(form.capacity_pricing.base_price_per_person) || 0,
                 },
-                extra_options: { ...form.extra_options },
+                // Store only completed itinerary days; an empty departure itinerary stays empty
+                // so legacy events can continue using their general itinerary as a fallback.
+                extra_options: {
+                    ...form.extra_options,
+                    itinerary: (() => {
+                        const days = parseScheduleItinerary(form.extra_options.itinerary)
+                            .filter((day) => (day.title || "").trim() || (day.description || "").trim())
+                            .map((day, index) => ({ day: index + 1, title: (day.title || "").trim(), description: (day.description || "").trim() }));
+                        return days.length ? JSON.stringify(days) : "";
+                    })(),
+                },
                 pickups: form.pickups.map((p, i) => ({
                     ...p,
                     order_number: i + 1,
