@@ -92,13 +92,13 @@ function EventSearchOverlay({ onClose }) {
                 <div className="flex items-center justify-between">
                     <a href="/" onClick={onClose} className="flex items-center gap-3 text-sm font-semibold tracking-wide text-neutral-200">
                         <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] p-1.5 shadow-lg shadow-black/20"><Logo /></span>
-                        <span className="leading-tight"><span className="block text-sm font-bold tracking-[0.12em] text-white">LIVING</span><span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">The Adventure</span></span>
+                        <span className="leading-tight"><span className="block text-sm font-bold tracking-[0.12em] text-white">LIVING</span><span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.2em] text-white">The Adventure</span></span>
                     </a>
                     <button
                         type="button"
                         onClick={onClose}
                         aria-label="Close search"
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-neutral-300 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-neutral-300 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
                         <FaTimes />
                     </button>
@@ -150,7 +150,7 @@ function EventSearchOverlay({ onClose }) {
                                         key={event.event_id || event.id}
                                         type="button"
                                         onClick={() => openEvent(event)}
-                                        className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/[0.09] bg-neutral-900/70 text-left transition duration-300 hover:-translate-y-1 hover:border-amber-300/40 hover:bg-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                                        className="group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/10 bg-neutral-900 text-left transition duration-300 hover:-translate-y-1 hover:border-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                                     >
                                         <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-800">
                                             {event.poster_horizontal_1_url || event.cover_image_url || event.poster_vertical_3_url ? (
@@ -161,14 +161,19 @@ function EventSearchOverlay({ onClose }) {
                                                     className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                                 />
                                             ) : <div className="flex h-full items-center justify-center text-neutral-600"><FaMountain className="h-6 w-6" /></div>}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-85 transition-opacity duration-300 group-hover:opacity-100" />
+                                            <div className="absolute inset-x-0 bottom-0 p-3 transition-all duration-300 sm:p-4">
+                                                <span className="block line-clamp-2 text-sm font-bold leading-5 text-white sm:text-base">{event.title}</span>
+                                                <span className="mt-1 block text-[10px] font-medium uppercase tracking-wider text-white/70 sm:text-xs">{(event.event_type || 'adventure').replaceAll('_', ' ')}</span>
+                                                <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 group-hover:grid-rows-[1fr]">
+                                                    <div className="overflow-hidden">
+                                                        {event.location && <span className="mt-2 flex items-center gap-1.5 text-xs text-white/80"><FaMapMarkerAlt className="shrink-0" />{event.location}</span>}
+                                                        {event.short_description && <span className="mt-1 line-clamp-2 block text-xs leading-4 text-white/70">{event.short_description}</span>}
+                                                        <span className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-black transition hover:bg-neutral-200">Explore event <FaArrowRight /></span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span className="flex min-w-0 flex-1 flex-col items-start p-3 sm:p-4">
-                                            <span className="line-clamp-2 w-full text-sm font-semibold leading-5 text-white sm:text-base">{event.title}</span>
-                                            <span className="mt-2 inline-flex max-w-full rounded-full border border-amber-300/20 bg-amber-300/[0.08] px-2 py-1 text-[10px] capitalize text-amber-200 sm:text-xs">{(event.event_type || 'adventure').replaceAll('_', ' ')}</span>
-                                            {event.location && <span className="mt-2 flex items-center gap-1.5 truncate text-xs text-neutral-400"><FaMapMarkerAlt className="shrink-0" />{event.location}</span>}
-                                            {event.short_description && <span className="mt-2 line-clamp-3 text-xs leading-5 text-neutral-400">{event.short_description}</span>}
-                                            <span className="mt-3 flex items-center gap-2 text-xs font-medium text-amber-200 transition group-hover:text-amber-100">Explore event <FaArrowRight className="transition group-hover:translate-x-1" /></span>
-                                        </span>
                                     </button>
                                 ))}
                             </div>
