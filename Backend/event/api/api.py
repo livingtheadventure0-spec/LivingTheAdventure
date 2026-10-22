@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
@@ -11,6 +11,7 @@ from event.service.service import (
     get_event_by_uuid,
     create_event,
     get_events_by_type,
+    search_events,
     update_event,
     delete_event,
     serialize_event_media,
@@ -30,6 +31,19 @@ def list_events(
     db: Session = Depends(get_db),
 ):
     return [serialize_event_media(event) for event in get_events(db, skip=skip, limit=limit)]
+
+
+@router.get("/search", response_model=List[EventOut])
+def search_published_events(
+    q: str = Query(..., min_length=1, max_length=120, description="Search event titles, SEO metadata, tags and descriptions"),
+    limit: int = Query(12, ge=1, le=30),
+    db: Session = Depends(get_db),
+):
+    """Search published events across their public-facing and SEO content."""
+    return [
+        serialize_event_media(event)
+        for event in search_events(db, query=q, limit=limit)
+    ]
 
 
 @router.get("/{event_id}", response_model=EventOut)
