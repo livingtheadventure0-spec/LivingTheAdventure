@@ -91,10 +91,8 @@ function EventSearchOverlay({ onClose }) {
             <div className="relative mx-auto min-h-full w-full max-w-6xl px-5 pb-12 pt-6 sm:px-8 sm:pt-10">
                 <div className="flex items-center justify-between">
                     <a href="/" onClick={onClose} className="flex items-center gap-3 text-sm font-semibold tracking-wide text-neutral-200">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.05]">
-                            <FaSearch className="text-amber-300" />
-                        </span>
-                        EXPLORE
+                        <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] p-1.5 shadow-lg shadow-black/20"><Logo /></span>
+                        <span className="leading-tight"><span className="block text-sm font-bold tracking-[0.12em] text-white">LIVING</span><span className="mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-300">The Adventure</span></span>
                     </a>
                     <button
                         type="button"
@@ -146,15 +144,15 @@ function EventSearchOverlay({ onClose }) {
                             </div>
                         )}
                         {results.length > 0 && (
-                            <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                                 {results.map((event) => (
                                     <button
                                         key={event.event_id || event.id}
                                         type="button"
                                         onClick={() => openEvent(event)}
-                                        className="group flex min-w-0 items-center gap-4 rounded-2xl border border-white/[0.09] bg-white/[0.035] p-3 text-left transition hover:border-amber-300/40 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                                        className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-white/[0.09] bg-neutral-900/70 text-left transition duration-300 hover:-translate-y-1 hover:border-amber-300/40 hover:bg-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
                                     >
-                                        <div className="h-20 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-800 sm:h-24 sm:w-32">
+                                        <div className="relative aspect-[3/4] w-full overflow-hidden bg-neutral-800">
                                             {event.poster_horizontal_1_url || event.cover_image_url || event.poster_vertical_3_url ? (
                                                 <img
                                                     src={event.poster_horizontal_1_url || event.cover_image_url || event.poster_vertical_3_url}
@@ -164,13 +162,13 @@ function EventSearchOverlay({ onClose }) {
                                                 />
                                             ) : <div className="flex h-full items-center justify-center text-neutral-600"><FaMountain className="h-6 w-6" /></div>}
                                         </div>
-                                        <span className="min-w-0 flex-1 py-1">
-                                            <span className="block truncate text-base font-semibold text-white">{event.title}</span>
-                                            <span className="mt-1 block text-xs capitalize text-amber-200">{(event.event_type || 'adventure').replaceAll('_', ' ')}</span>
+                                        <span className="flex min-w-0 flex-1 flex-col items-start p-3 sm:p-4">
+                                            <span className="line-clamp-2 w-full text-sm font-semibold leading-5 text-white sm:text-base">{event.title}</span>
+                                            <span className="mt-2 inline-flex max-w-full rounded-full border border-amber-300/20 bg-amber-300/[0.08] px-2 py-1 text-[10px] capitalize text-amber-200 sm:text-xs">{(event.event_type || 'adventure').replaceAll('_', ' ')}</span>
                                             {event.location && <span className="mt-2 flex items-center gap-1.5 truncate text-xs text-neutral-400"><FaMapMarkerAlt className="shrink-0" />{event.location}</span>}
-                                            {event.short_description && <span className="mt-1 line-clamp-2 text-xs leading-5 text-neutral-400">{event.short_description}</span>}
+                                            {event.short_description && <span className="mt-2 line-clamp-3 text-xs leading-5 text-neutral-400">{event.short_description}</span>}
+                                            <span className="mt-3 flex items-center gap-2 text-xs font-medium text-amber-200 transition group-hover:text-amber-100">Explore event <FaArrowRight className="transition group-hover:translate-x-1" /></span>
                                         </span>
-                                        <FaArrowRight className="mr-1 shrink-0 text-sm text-neutral-600 transition group-hover:translate-x-1 group-hover:text-amber-300" />
                                     </button>
                                 ))}
                             </div>
