@@ -891,6 +891,38 @@ function EventDetail() {
                         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
                             <button
                                 type="button"
+                                onClick={async () => {
+                                    const shareUrl = window.location.href.split("#")[0];
+                                    const shareTitle = event.title || "Living The Adventure";
+                                    const shareText = "Check out " + shareTitle + " on Living The Adventure!";
+                                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(shareText + " " + shareUrl);
+                                    try {
+                                        if (navigator.share) {
+                                            await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+                                        } else if (navigator.clipboard?.writeText) {
+                                            await navigator.clipboard.writeText(shareUrl);
+                                            window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+                                        } else {
+                                            window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+                                        }
+                                    } catch (error) {
+                                        if (error?.name !== "AbortError") window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+                                    }
+                                }}
+                                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/35 bg-transparent px-3 py-3 text-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:px-5 sm:text-sm"
+                                aria-label="Share this event"
+                                title="Share this event"
+                            >
+                                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
+                                    <circle cx="18" cy="5" r="3" />
+                                    <circle cx="6" cy="12" r="3" />
+                                    <circle cx="18" cy="19" r="3" />
+                                    <path d="m8.7 10.6 6.6-4.2M8.7 13.4l6.6 4.2" strokeLinecap="round" />
+                                </svg>
+                                <span>Share</span>
+                            </button>
+                            <button
+                                type="button"
                                 onClick={() => downloadEventPdf(event, eventSchedule)}
                                 className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-transparent px-3 py-3 text-xs font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:px-5 sm:text-sm"
                                 aria-label="Download event details as PDF"
