@@ -932,19 +932,24 @@ function EventDetail() {
                 const shareUrl = event?.id ? `https://livingtheadventure.in/api/events/share/${encodeURIComponent(event.id)}` : window.location.href.split("#")[0];
                 const posterUrl = event.poster_horizontal_1_url || event.cover_image_url || "";
                 const title = event.title || "Living The Adventure";
-                const description = (event.seo_description || event.short_description || "Discover the outdoors with Living The Adventure.").replace(/\\s+/g, " ").trim().slice(0, 220);
-                const marketingMessage = `🏔️ YOUR NEXT ADVENTURE STARTS HERE! 🏔️
+                const rawDescription = event.short_description || event.seo_description || `Discover ${title} with Living The Adventure.`;
+                const description = String(rawDescription)
+                    .replace(/<[^>]*>/g, " ")
+                    .replace(/[,;|]+/g, " ")
+                    .replace(/\\s+/g, " ")
+                    .trim()
+                    .slice(0, 240);
+                const eventPageUrl = window.location.origin + `/eventDetails/${event.id}`;
+                const marketingMessage = `LIVING THE ADVENTURE
 
-Join Living The Adventure for ${title}.
+${title}
 
 ${description}
 
-✨ Discover the experience. Make memories. Live the adventure.
-
-🔗 Explore event details & dates:
+Explore upcoming dates, itinerary and booking details:
 ${shareUrl}
 
-Living The Adventure | Find your next escape.`;
+Plan your next adventure with Living The Adventure.`;
                 const copyMessage = async () => {
                     try { await navigator.clipboard.writeText(marketingMessage); window.alert("Message copied. Attach the event poster in WhatsApp for the full promotional share."); }
                     catch { window.prompt("Copy your event message:", marketingMessage); }
@@ -972,7 +977,7 @@ Living The Adventure | Find your next escape.`;
                                 <div><p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-400">Living The Adventure</p><h2 id="event-share-title" className="mt-2 text-2xl font-bold sm:text-3xl">Share this adventure</h2><p className="mt-2 text-sm text-neutral-400">A ready-to-send promotional message with your event poster.</p></div>
                                 <button type="button" onClick={() => setShareOpen(false)} className="rounded-full border border-white/20 px-3 py-2 text-sm hover:bg-white/10" aria-label="Close share dialog">✕</button>
                             </div>
-                            {posterUrl ? <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black"><img src={posterUrl} alt={`${title} event poster`} className="max-h-64 w-full object-contain" /></div> : <div className="mt-5 rounded-2xl border border-white/10 p-5 text-sm text-neutral-400">No horizontal poster is configured for this event.</div>}
+                            {posterUrl ? <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black"><img src={posterUrl} alt={`${title} event poster`} className="aspect-[1200/630] max-h-64 w-full object-cover" /></div> : <div className="mt-5 rounded-2xl border border-white/10 p-5 text-sm text-neutral-400">No horizontal poster is configured for this event.</div>}
                             <label htmlFor="event-marketing-message" className="mt-5 block text-sm font-semibold">Promotional message</label>
                             <textarea id="event-marketing-message" readOnly value={marketingMessage} className="mt-2 min-h-52 w-full resize-y rounded-2xl border border-white/15 bg-white/[0.04] p-4 text-sm leading-6 text-neutral-200 outline-none focus:border-white/40" />
                             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
