@@ -2,7 +2,7 @@
 
 from uuid import uuid4
 
-from sqlalchemy.orm import Session
+from sqlalchemy import func, or_\nfrom sqlalchemy.orm import Session
 
 from event.model.model import Event
 from favourite.model.model import Favourite
@@ -38,6 +38,38 @@ def get_events(db: Session, skip: int = 0, limit: int = 100):
         db.query(Event)
         .filter(Event.status == "published")
         .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+def search_events(db: Session, query: str, limit: int = 12):
+    """Search published events by title, SEO metadata/tags and useful event details."""
+    term = query.strip()
+    if not term:
+        return []
+
+    pattern = f"%{term}%"
+    searchable_fields = [
+        Event.title.ilike(pattern),
+        Event.seo_title.ilike(pattern),
+        Event.seo_description.ilike(pattern),
+        Event.short_description.ilike(pattern),
+        Event.location.ilike(pattern),
+        Event.event_type.ilike(pattern),
+        Event.adventure_activity_category.ilike(pattern),
+        Event.adventure_difficulty_level.ilike(pattern),
+        Event.trek_difficulty_level.ilike(pattern),
+        Event.peak_difficulty_level.ilike(pattern),
+        Event.peak_group_type.ilike(pattern),
+        func.array_to_string(Event.seo_tags, " ").ilike(pattern),
+        func.array_to_string(Event.highlights, " ").ilike(pattern),
+    ]
+
+    return (
+        db.query(Event)
+        .filter(Event.status == "published", or_(*searchable_fields))
+        .order_by(Event.updated_at.desc().nullslast(), Event.created_at.desc().nullslast(), Event.title.asc())
         .limit(limit)
         .all()
     )
