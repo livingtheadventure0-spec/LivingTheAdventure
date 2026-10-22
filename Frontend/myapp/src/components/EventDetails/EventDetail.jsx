@@ -939,7 +939,6 @@ function EventDetail() {
                     .replace(/\\s+/g, " ")
                     .trim()
                     .slice(0, 240);
-                const eventPageUrl = window.location.origin + `/eventDetails/${event.id}`;
                 const marketingMessage = `LIVING THE ADVENTURE
 
 ${title}
