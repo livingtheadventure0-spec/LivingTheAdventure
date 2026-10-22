@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import HTMLResponse, Response
-from urllib.request import Request, urlopen
-from urllib.error import URLError, HTTPError
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
@@ -71,9 +69,15 @@ def share_event_preview(event_id: int, db: Session = Depends(get_db)):
     description = " ".join(description.replace(",", " ").replace("|", " ").split()).strip()
     if len(description) > 240:
         description = description[:237].rsplit(" ", 1)[0] + "..."
-    # The database stores canonical object URLs; create a long-lived (7 day max)
-    # signed URL for private S3 objects so WhatsApp's crawler can fetch the image.
-    poster = f"https://livingtheadventure.in/api/events/share/{event.id}/poster" if (event.poster_horizontal_1_url or event.cover_image_url) else ""
+    # Give WhatsApp a directly fetchable image URL. A nested same-domain poster
+    # endpoint can be routed to the frontend deployment instead of this API service.
+    # Sign private S3 objects for a week so crawlers can fetch the image.
+    source_url = event.poster_horizontal_1_url or event.cover_image_url or ""
+    try:
+        poster = private_media_url(source_url, expires_in=604800) if source_url else ""
+    except Exception:
+        # Keep sharing functional for public image URLs even if signing is unavailable.
+        poster = source_url
 
     canonical_url = f"https://livingtheadventure.in/eventDetails/{event.id}"
     safe_title = escape(title, quote=True)
@@ -114,42 +118,6 @@ def share_event_preview(event_id: int, db: Session = Depends(get_db)):
 </body>
 </html>"""
     return HTMLResponse(content=html, headers={"Cache-Control": "public, max-age=300"})
-
-
-@router.get("/share/{event_id}/poster", include_in_schema=False)
-def share_event_poster(event_id: int, db: Session = Depends(get_db)):
-    """Serve the event poster from our own stable URL for WhatsApp/Open Graph crawlers."""
-    event = db.query(Event).filter(
-        Event.id == event_id,
-        Event.status == "published",
-    ).first()
-    if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
-
-    source_url = event.poster_horizontal_1_url or event.cover_image_url
-    if not source_url:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event poster not found")
-
-    try:
-        fetch_url = private_media_url(source_url, expires_in=3600)
-        request = Request(fetch_url, headers={"User-Agent": "LivingTheAdventure-SharePreview/1.0"})
-        with urlopen(request, timeout=8) as upstream:
-            image_bytes = upstream.read(8 * 1024 * 1024 + 1)
-            if len(image_bytes) > 8 * 1024 * 1024:
-                raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Poster is too large")
-            content_type = upstream.headers.get_content_type()
-            if not content_type.startswith("image/"):
-                raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Poster source is not an image")
-    except HTTPException:
-        raise
-    except (URLError, HTTPError, TimeoutError, OSError, ValueError):
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Unable to load event poster")
-
-    return Response(
-        content=image_bytes,
-        media_type=content_type,
-        headers={"Cache-Control": "public, max-age=3600", "X-Content-Type-Options": "nosniff"},
-    )
 
 
 @router.get("/{event_id}", response_model=EventOut)

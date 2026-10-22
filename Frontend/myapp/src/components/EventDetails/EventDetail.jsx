@@ -961,13 +961,28 @@ Plan your next adventure with Living The Adventure.`;
                         const blob = await response.blob();
                         const mimeType = blob.type || "image/jpeg";
                         const extension = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
-                        const file = new File([blob], `${title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event"}-poster.${extension}`, { type: mimeType });
+                        const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event";
+                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: mimeType });
                         if (navigator.share && navigator.canShare?.({ files: [file] })) {
                             await navigator.share({ files: [file], title, text: marketingMessage });
                             return;
                         }
-                        window.alert("This browser cannot attach an image directly. Open/download the poster, attach it in WhatsApp, and paste the copied message.");
-                    } catch { window.alert("Automatic image sharing is blocked by this browser or image host. Open/download the poster, attach it in WhatsApp, and paste the copied message."); }
+
+                        // Desktop WhatsApp links cannot carry file attachments. Download
+                        // the event-specific poster, then open WhatsApp with its message.
+                        const objectUrl = URL.createObjectURL(blob);
+                        const downloadLink = document.createElement("a");
+                        downloadLink.href = objectUrl;
+                        downloadLink.download = file.name;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        downloadLink.remove();
+                        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
+                        window.open("https://wa.me/?text=" + encodeURIComponent(marketingMessage), "_blank", "noopener,noreferrer");
+                        window.alert("The event poster has been downloaded. Attach that image in WhatsApp, then send the prepared event message.");
+                    } catch {
+                        window.alert("The poster could not be downloaded automatically. Use Open / download poster, then attach it in WhatsApp and paste the event message.");
+                    }
                 };
                 return (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="event-share-title" onClick={(e) => { if (e.target === e.currentTarget) setShareOpen(false); }}>
