@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
+from html import escape
 
 from database.database import get_db
+from event.model.model import Event
+from upload.s3 import private_media_url
 
 from event.service.service import (
     get_events,
@@ -44,6 +48,70 @@ def search_published_events(
         serialize_event_media(event)
         for event in search_events(db, query=q, limit=limit)
     ]
+
+
+@router.get("/share/{event_id}", response_class=HTMLResponse, include_in_schema=False)
+def share_event_preview(event_id: int, db: Session = Depends(get_db)):
+    """
+    Server-render share metadata for social crawlers, then send human visitors
+    to the normal React event page. Social crawlers do not execute the SPA.
+    """
+    event = db.query(Event).filter(
+        Event.id == event_id,
+        Event.status == "published",
+    ).first()
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+
+    title = (event.seo_title or event.title or "Living The Adventure").strip()
+    description = (event.seo_description or event.short_description or f"Discover {title} with Living The Adventure.").strip()
+    # The database stores canonical object URLs; create a long-lived (7 day max)
+    # signed URL for private S3 objects so WhatsApp's crawler can fetch the image.
+    poster = event.poster_horizontal_1_url or event.cover_image_url or ""
+    try:
+        poster = private_media_url(poster, expires_in=604800) if poster else ""
+    except Exception:
+        # A missing AWS configuration should not prevent sharing the event link.
+        poster = event.poster_horizontal_1_url or event.cover_image_url or ""
+
+    canonical_url = f"https://livingtheadventure.in/eventDetails/{event.id}"
+    safe_title = escape(title, quote=True)
+    safe_description = escape(description, quote=True)
+    safe_url = escape(canonical_url, quote=True)
+    safe_poster = escape(poster, quote=True)
+    image_tags = ""
+    if safe_poster:
+        image_tags = f"""
+    <meta property="og:image" content="{safe_poster}" />
+    <meta property="og:image:secure_url" content="{safe_poster}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:image" content="{safe_poster}" />"""
+
+    html = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{safe_title} | Living The Adventure</title>
+  <meta name="description" content="{safe_description}" />
+  <link rel="canonical" href="{safe_url}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Living The Adventure" />
+  <meta property="og:title" content="{safe_title}" />
+  <meta property="og:description" content="{safe_description}" />
+  <meta property="og:url" content="{safe_url}" />{image_tags}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{safe_title}" />
+  <meta name="twitter:description" content="{safe_description}" />
+  <meta http-equiv="refresh" content="0;url={safe_url}" />
+</head>
+<body>
+  <p>Opening <a href="{safe_url}">{safe_title}</a> on Living The Adventure…</p>
+  <script>window.location.replace({safe_url!r});</script>
+</body>
+</html>"""
+    return HTMLResponse(content=html, headers={"Cache-Control": "public, max-age=300"})
 
 
 @router.get("/{event_id}", response_model=EventOut)
