@@ -12,7 +12,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "https://backend-theta-seven-48.vercel.app/$1"
+            "dest": "https://living-the-adventure.vercel.app/$1"
         },
         {
             "handle": "filesystem"
