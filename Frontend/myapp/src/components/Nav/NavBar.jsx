@@ -82,12 +82,12 @@ function EventSearchOverlay({ onClose }) {
 
     return (
         <div
-            className="fixed inset-0 z-[100] overflow-y-auto bg-neutral-950/95 text-white backdrop-blur-2xl"
+            className="fixed inset-0 z-[100] overflow-y-auto bg-black/65 text-white backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
             aria-label="Search adventures"
         >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(217,166,63,0.10),transparent_42%),radial-gradient(ellipse_at_bottom_right,rgba(20,184,166,0.07),transparent_38%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/60" />
             <div className="relative mx-auto min-h-full w-full max-w-6xl px-5 pb-12 pt-6 sm:px-8 sm:pt-10">
                 <div className="flex items-center justify-between">
                     <a href="/" onClick={onClose} className="flex items-center gap-3 text-sm font-semibold tracking-wide text-neutral-200">
@@ -211,13 +211,13 @@ function NavBar() {
                 </div>
 
                 <nav className="flex min-h-0 w-full flex-1 flex-col justify-center gap-2 px-2" aria-label="Explore">
-                    <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search adventures" title="Search" className="block rounded-full text-left outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
-                        <NavLink icon={<FaSearch className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Search" />
-                    </button>
                     <a href="/" aria-label="Home" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
                         <NavLink icon={<FaHome className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Home" />
                     </a>
-                    <a href="/trips" aria-label="Tours" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
+
+                    <button type="button" onClick={() => setSearchOpen(true)} aria-label="Search adventures" title="Search" className="block rounded-full text-left outline-none focus-visible:ring-2 focus-visible:ring-amber-300">
+                        <NavLink icon={<FaSearch className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Search" />
+                    </button>                    <a href="/trips" aria-label="Tours" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
                         <NavLink icon={<FaSuitcaseRolling className="h-5 w-5 sm:h-[21px] sm:w-[21px]" />} label="Tours" />
                     </a>
                     <a href="/treks" aria-label="Treks" className="block rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80">
