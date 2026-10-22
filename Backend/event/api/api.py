@@ -64,7 +64,11 @@ def share_event_preview(event_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
 
     title = (event.seo_title or event.title or "Living The Adventure").strip()
-    description = (event.seo_description or event.short_description or f"Discover {title} with Living The Adventure.").strip()
+    # Prefer the readable event summary over SEO keyword lists for social previews.
+    description = (event.short_description or event.seo_description or f"Discover {title} with Living The Adventure.")
+    description = " ".join(description.replace(",", " ").replace("|", " ").split()).strip()
+    if len(description) > 240:
+        description = description[:237].rsplit(" ", 1)[0] + "..."
     # The database stores canonical object URLs; create a long-lived (7 day max)
     # signed URL for private S3 objects so WhatsApp's crawler can fetch the image.
     poster = event.poster_horizontal_1_url or event.cover_image_url or ""
