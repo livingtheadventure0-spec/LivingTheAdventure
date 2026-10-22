@@ -2,7 +2,8 @@
 
 from uuid import uuid4
 
-from sqlalchemy import func, or_\nfrom sqlalchemy.orm import Session
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
 
 from event.model.model import Event
 from favourite.model.model import Favourite
