@@ -892,12 +892,16 @@ function EventDetail() {
                             <button
                                 type="button"
                                 onClick={async () => {
-                                    const shareUrl = window.location.href.split("#")[0];
+                                    const eventPageUrl = window.location.href.split("#")[0];
                                     const posterUrl = event.poster_horizontal_1_url;
                                     const shareTitle = event.title || "Living The Adventure";
                                     const shareText = "Check out " + shareTitle + " on Living The Adventure!";
-                                    // Include the event-specific horizontal poster in the share when the device supports image attachments.
-                                    const whatsappText = [shareText, posterUrl, shareUrl].filter(Boolean).join("\n");
+                                    // This server-rendered URL supplies Open Graph tags to WhatsApp's crawler.
+                                    // Human visitors are redirected to the normal event page.
+                                    const shareUrl = event?.id
+                                        ? window.location.origin + "/api/events/share/" + encodeURIComponent(event.id)
+                                        : eventPageUrl;
+                                    const whatsappText = shareText + "\n" + shareUrl;
                                     const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(whatsappText);
                                     try {
                                         if (navigator.share && posterUrl && navigator.canShare) {
@@ -918,7 +922,7 @@ function EventDetail() {
                                             }
                                         }
                                         if (navigator.share) {
-                                            await navigator.share({ title: shareTitle, text: whatsappText, url: shareUrl });
+                                            await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
                                         } else {
                                             window.open(whatsappUrl, "_blank", "noopener,noreferrer");
                                         }
