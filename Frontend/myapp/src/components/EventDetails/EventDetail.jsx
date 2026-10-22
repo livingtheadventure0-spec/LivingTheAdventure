@@ -893,15 +893,32 @@ function EventDetail() {
                                 type="button"
                                 onClick={async () => {
                                     const shareUrl = window.location.href.split("#")[0];
+                                    const posterUrl = event.poster_horizontal_1_url;
                                     const shareTitle = event.title || "Living The Adventure";
                                     const shareText = "Check out " + shareTitle + " on Living The Adventure!";
-                                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(shareText + " " + shareUrl);
+                                    // Include the event-specific horizontal poster in the share when the device supports image attachments.
+                                    const whatsappText = [shareText, posterUrl, shareUrl].filter(Boolean).join("\n");
+                                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(whatsappText);
                                     try {
+                                        if (navigator.share && posterUrl && navigator.canShare) {
+                                            try {
+                                                const response = await fetch(posterUrl, { mode: "cors" });
+                                                if (response.ok) {
+                                                    const blob = await response.blob();
+                                                    const mimeType = blob.type || "image/jpeg";
+                                                    const extension = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
+                                                    const posterFile = new File([blob], "living-the-adventure-event-poster." + extension, { type: mimeType });
+                                                    if (navigator.canShare({ files: [posterFile] })) {
+                                                        await navigator.share({ title: shareTitle, text: shareText + " " + shareUrl, files: [posterFile] });
+                                                        return;
+                                                    }
+                                                }
+                                            } catch (posterError) {
+                                                // If the poster cannot be fetched/shared (for example, due to image-host CORS), fall back to the event link.
+                                            }
+                                        }
                                         if (navigator.share) {
-                                            await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
-                                        } else if (navigator.clipboard?.writeText) {
-                                            await navigator.clipboard.writeText(shareUrl);
-                                            window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+                                            await navigator.share({ title: shareTitle, text: whatsappText, url: shareUrl });
                                         } else {
                                             window.open(whatsappUrl, "_blank", "noopener,noreferrer");
                                         }
