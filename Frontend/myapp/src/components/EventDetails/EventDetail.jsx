@@ -897,7 +897,8 @@ function EventDetail() {
                                     const shareTitle = event.title || "Living The Adventure";
                                     const shareText = "Check out " + shareTitle + " on Living The Adventure!";
                                     // Include the event-specific horizontal poster in the share when the device supports image attachments.
-                                    const whatsappText = [shareText, posterUrl, shareUrl].filter(Boolean).join("\n");
+                                    // WhatsApp treats wa.me text as a message, not an image attachment. Do not paste the signed S3 poster URL into the chat; share the event page URL so its Open Graph preview can be used once server-side metadata is configured.
+                                    const whatsappText = shareText + "\n" + shareUrl;
                                     const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(whatsappText);
                                     try {
                                         if (navigator.share && posterUrl && navigator.canShare) {
@@ -918,7 +919,7 @@ function EventDetail() {
                                             }
                                         }
                                         if (navigator.share) {
-                                            await navigator.share({ title: shareTitle, text: whatsappText, url: shareUrl });
+                                            await navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
                                         } else {
                                             window.open(whatsappUrl, "_blank", "noopener,noreferrer");
                                         }
