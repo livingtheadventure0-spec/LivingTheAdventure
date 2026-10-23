@@ -957,39 +957,54 @@ Plan your next adventure with Living The Adventure.`;
                         window.prompt("Copy your event message:", marketingMessage);
                     }
                 };
+                const openWhatsAppMessage = () => {
+                    const url = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
+                    const popup = window.open(url, "_blank");
+                    if (!popup) window.location.assign(url);
+                };
                 const sharePoster = async () => {
-                    if (!posterUrl) { window.alert("No event poster is available for this event yet."); return; }
+                    if (!posterUrl) {
+                        openWhatsAppMessage();
+                        return;
+                    }
+
+                    // Open a window synchronously while the click gesture is active.
+                    // Browsers may block window.open after an awaited network request.
+                    const fallbackWindow = window.open("", "_blank");
                     try {
-                        const response = await fetch(posterUrl);
-                        if (!response.ok) throw new Error("Poster download failed");
+                        const response = await fetch(posterUrl, { mode: "cors" });
+                        if (!response.ok) throw new Error("Poster fetch failed");
                         const blob = await response.blob();
-                        const mimeType = blob.type || "image/jpeg";
-                        const extension = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
+                        if (!blob.type.startsWith("image/")) throw new Error("Poster response is not an image");
+                        const extension = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
                         const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event";
-                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: mimeType });
+                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: blob.type });
                         if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                            fallbackWindow?.close();
                             await navigator.share({ files: [file], title, text: marketingMessage });
                             return;
                         }
 
-                        // WhatsApp's desktop URL API cannot pre-attach a local image.
-                        // Download the poster and open a prefilled message as the safest fallback.
-                        const whatsappWindow = window.open("https://wa.me/?text=" + encodeURIComponent(marketingMessage), "_blank", "noopener,noreferrer");
                         const objectUrl = URL.createObjectURL(blob);
-                        const downloadLink = document.createElement("a");
-                        downloadLink.href = objectUrl;
-                        downloadLink.download = file.name;
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        downloadLink.remove();
+                        const anchor = document.createElement("a");
+                        anchor.href = objectUrl;
+                        anchor.download = file.name;
+                        document.body.appendChild(anchor);
+                        anchor.click();
+                        anchor.remove();
                         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
-                        if (!whatsappWindow) {
-                            window.alert("The poster was downloaded, but your browser blocked WhatsApp from opening. Open WhatsApp manually, attach the downloaded poster, and paste the prepared message.");
-                        } else {
-                            window.alert("The poster was downloaded and WhatsApp opened with your message. In WhatsApp, attach the downloaded poster before sending; desktop browsers cannot attach it automatically.");
-                        }
-                    } catch {
-                        window.alert("The poster could not be downloaded automatically. Use Open / download poster, then attach it in WhatsApp and paste the event message.");
+                    } catch (error) {
+                        // Cross-origin S3/CDN images may display in <img> while fetch is
+                        // blocked by CORS. Keep the message share usable regardless.
+                        console.warn("Poster could not be fetched for sharing:", error);
+                        window.alert("The poster could not be downloaded automatically (possibly due to storage CORS). Open / download poster separately and attach it in WhatsApp.");
+                    }
+
+                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
+                    if (fallbackWindow && !fallbackWindow.closed) {
+                        fallbackWindow.location.replace(whatsappUrl);
+                    } else {
+                        window.location.assign(whatsappUrl);
                     }
                 };
                 return (
