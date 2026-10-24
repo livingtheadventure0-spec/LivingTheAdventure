@@ -193,6 +193,7 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
                                             alt={hero.title}
                                             width="96"
                                             height="64"
+                                            sizes="(min-width: 640px) 96px, 80px"
                                             loading="lazy"
                                             decoding="async"
                                             className="w-full h-full object-cover"
