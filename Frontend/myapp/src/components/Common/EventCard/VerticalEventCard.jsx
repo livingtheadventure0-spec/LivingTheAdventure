@@ -99,6 +99,8 @@ function VerticalEventCard({ item, isFavourite, onToggleFavourite }) {
                                         <img
                                             src={details.cover_image_url}
                                             alt={details.title}
+                                            loading="lazy"
+                                            decoding="async"
                                             className="w-full h-20 object-cover"
                                         />
                                     </div>
