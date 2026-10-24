@@ -56,6 +56,9 @@ function VerticalEventCard({ item, isFavourite, onToggleFavourite }) {
                         <img
                             src={item.imageUrl}
                             alt={item.name}
+                            width="208"
+                            height="312"
+                            sizes="(min-width: 1024px) 208px, (min-width: 768px) 176px, (min-width: 640px) 160px, 144px"
                             loading="lazy"
                             decoding="async"
                             className="
@@ -99,6 +102,11 @@ function VerticalEventCard({ item, isFavourite, onToggleFavourite }) {
                                         <img
                                             src={details.cover_image_url}
                                             alt={details.title}
+                                            width="320"
+                                            height="128"
+                                            sizes="208px"
+                                            loading="lazy"
+                                            decoding="async"
                                             className="w-full h-20 object-cover"
                                         />
                                     </div>

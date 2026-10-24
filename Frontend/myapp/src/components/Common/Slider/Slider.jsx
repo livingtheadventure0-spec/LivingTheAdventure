@@ -8,6 +8,14 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
     const [activeHero, setActiveHero] = useState(initialHero);
     const [audioOn, setAudioOn] = useState(false);
     const [fade, setFade] = useState(false);
+    const [videoRequested, setVideoRequested] = useState(false);
+
+    // Let the poster and page content paint before requesting the original hero video.
+    useEffect(() => {
+        setVideoRequested(false);
+        const timer = setTimeout(() => setVideoRequested(true), 1200);
+        return () => clearTimeout(timer);
+    }, [activeHero?.id]);
 
     useEffect(() => {
         if (heroContent.length) setActiveHero(heroContent[0]);
@@ -46,6 +54,10 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
                 <img
                     src={activeHero.thumbnail}
                     alt=""
+                    width="1920"
+                    height="1080"
+                    fetchPriority="high"
+                    decoding="async"
                     aria-hidden="true"
                     className={`absolute inset-0 h-full w-full object-cover sm:hidden transition-opacity duration-300 ${fade ? "opacity-0" : "opacity-100"}`}
                 />
@@ -53,8 +65,9 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
                 {/* Keep the autoplaying hero video on tablet and desktop. */}
                 <div className={`absolute inset-0 hidden sm:block transition-opacity duration-300 ${fade ? "opacity-0" : "opacity-100"}`}>
                     <video
+                        key={activeHero.id}
                         className="w-full h-full object-cover"
-                        src={activeHero.video}
+                        src={videoRequested ? activeHero.video : undefined}
                         poster={activeHero.thumbnail}
                         autoPlay
                         muted={!audioOn}
@@ -178,6 +191,9 @@ function Slider({ heroContent = [], favourites, onToggleFavourite }) {
                                         <img
                                             src={hero.thumbnail}
                                             alt={hero.title}
+                                            width="96"
+                                            height="64"
+                                            sizes="(min-width: 640px) 96px, 80px"
                                             loading="lazy"
                                             decoding="async"
                                             className="w-full h-full object-cover"
