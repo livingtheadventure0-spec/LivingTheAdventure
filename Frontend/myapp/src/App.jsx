@@ -1,11 +1,10 @@
 // App.jsx
 import './index.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Home from './components/Home/Home.jsx'
 import EventDetail from './components/EventDetails/EventDetail.jsx'
 import ViewAll from './components/View/ViewAll.jsx';
 import Auth from './Authentication/Auth.jsx';
-import SignupForm from './Authentication/SignupForm.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import Profile from './components/Profile/Profile.jsx';
 import AboutUs from './components/Legal/AboutUs.jsx';
@@ -74,7 +73,7 @@ function App() {
           <Route path="/best_of_the_year/launch" element={<ViewAll event_type="best_of_the_year" state="Launch" />} />
 
           <Route path="/auth" element={<Auth />} />
-          <Route path="/signup" element={<SignupForm />} />
+          <Route path="/signup" element={<Navigate to="/auth" replace />} />
           <Route path="/profile" element={<Profile />} />
 
           {/* Legal & Info pages */}
