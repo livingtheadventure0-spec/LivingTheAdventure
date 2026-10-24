@@ -936,7 +936,7 @@ function EventDetail() {
                 const description = String(rawDescription)
                     .replace(/<[^>]*>/g, " ")
                     .replace(/[,;|]+/g, " ")
-                    .replace(/\\s+/g, " ")
+                    .replace(/\s+/g, " ")
                     .trim()
                     .slice(0, 240);
                 const marketingMessage = `LIVING THE ADVENTURE
@@ -950,38 +950,61 @@ ${shareUrl}
 
 Plan your next adventure with Living The Adventure.`;
                 const copyMessage = async () => {
-                    try { await navigator.clipboard.writeText(marketingMessage); window.alert("Message copied. Attach the event poster in WhatsApp for the full promotional share."); }
-                    catch { window.prompt("Copy your event message:", marketingMessage); }
+                    try {
+                        await navigator.clipboard.writeText(marketingMessage);
+                        window.alert("Message copied. Use “Share image + message” to share the poster with its caption where supported.");
+                    } catch {
+                        window.prompt("Copy your event message:", marketingMessage);
+                    }
+                };
+                const openWhatsAppMessage = () => {
+                    const url = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
+                    const popup = window.open(url, "_blank");
+                    if (!popup) window.location.assign(url);
                 };
                 const sharePoster = async () => {
-                    if (!posterUrl) { window.alert("No event poster is available for this event yet."); return; }
+                    if (!posterUrl) {
+                        openWhatsAppMessage();
+                        return;
+                    }
+
+                    // Open a window synchronously while the click gesture is active.
+                    // Browsers may block window.open after an awaited network request.
+                    const fallbackWindow = window.open("", "_blank");
                     try {
-                        const response = await fetch(posterUrl);
-                        if (!response.ok) throw new Error("Poster download failed");
+                        const response = await fetch(posterUrl, { mode: "cors" });
+                        if (!response.ok) throw new Error("Poster fetch failed");
                         const blob = await response.blob();
-                        const mimeType = blob.type || "image/jpeg";
-                        const extension = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
+                        if (!blob.type.startsWith("image/")) throw new Error("Poster response is not an image");
+                        const extension = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
                         const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event";
-                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: mimeType });
+                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: blob.type });
                         if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                            fallbackWindow?.close();
                             await navigator.share({ files: [file], title, text: marketingMessage });
                             return;
                         }
 
-                        // Desktop WhatsApp links cannot carry file attachments. Download
-                        // the event-specific poster, then open WhatsApp with its message.
                         const objectUrl = URL.createObjectURL(blob);
-                        const downloadLink = document.createElement("a");
-                        downloadLink.href = objectUrl;
-                        downloadLink.download = file.name;
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        downloadLink.remove();
+                        const anchor = document.createElement("a");
+                        anchor.href = objectUrl;
+                        anchor.download = file.name;
+                        document.body.appendChild(anchor);
+                        anchor.click();
+                        anchor.remove();
                         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
-                        window.open("https://wa.me/?text=" + encodeURIComponent(marketingMessage), "_blank", "noopener,noreferrer");
-                        window.alert("The event poster has been downloaded. Attach that image in WhatsApp, then send the prepared event message.");
-                    } catch {
-                        window.alert("The poster could not be downloaded automatically. Use Open / download poster, then attach it in WhatsApp and paste the event message.");
+                    } catch (error) {
+                        // Cross-origin S3/CDN images may display in <img> while fetch is
+                        // blocked by CORS. Keep the message share usable regardless.
+                        console.warn("Poster could not be fetched for sharing:", error);
+                        window.alert("The poster could not be downloaded automatically (possibly due to storage CORS). Open / download poster separately and attach it in WhatsApp.");
+                    }
+
+                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
+                    if (fallbackWindow && !fallbackWindow.closed) {
+                        fallbackWindow.location.replace(whatsappUrl);
+                    } else {
+                        window.location.assign(whatsappUrl);
                     }
                 };
                 return (
@@ -997,10 +1020,9 @@ Plan your next adventure with Living The Adventure.`;
                             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <button type="button" onClick={copyMessage} className="rounded-full border border-white/25 px-5 py-3 text-sm font-semibold hover:bg-white/10">Copy message</button>
                                 {posterUrl ? <a href={posterUrl} target="_blank" rel="noreferrer" className="rounded-full border border-white/25 px-5 py-3 text-center text-sm font-semibold hover:bg-white/10">Open / download poster</a> : <button type="button" disabled className="rounded-full border border-white/10 px-5 py-3 text-sm text-neutral-500">Poster unavailable</button>}
-                                <button type="button" onClick={sharePoster} className="rounded-full border border-white/25 px-5 py-3 text-sm font-semibold hover:bg-white/10">Share poster image</button>
-                                <button type="button" onClick={() => window.open("https://wa.me/?text=" + encodeURIComponent(marketingMessage), "_blank", "noopener,noreferrer")} className="rounded-full bg-white px-5 py-3 text-sm font-bold text-black hover:bg-neutral-200">Continue to WhatsApp</button>
+                                <button type="button" onClick={sharePoster} className="sm:col-span-2 rounded-full bg-white px-5 py-3.5 text-sm font-bold text-black hover:bg-neutral-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">Share image + message</button>
                             </div>
-                            <p className="mt-4 text-xs leading-5 text-neutral-500">For the full promotional look on desktop, open the poster, attach it as a photo in WhatsApp, then paste the copied message. Browsers do not allow websites to silently attach files to a WhatsApp chat.</p>
+                            <p className="mt-4 text-xs leading-5 text-neutral-500">On supported phones, the share sheet can send the poster and message together. On desktop, the poster downloads and WhatsApp opens with the message; attach the downloaded image in WhatsApp before sending because browsers cannot attach files to WhatsApp automatically.</p>
                         </div>
                     </div>
                 );
