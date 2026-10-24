@@ -8,6 +8,7 @@ from typing import Optional,List
 class SignupCompleteRequest(BaseModel):
     first_name: str
     last_name: str
+    email: EmailStr
 
 class UserResponse(BaseModel):
     user_id: UUID
