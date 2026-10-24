@@ -47,6 +47,9 @@ def signup_complete(
 ):
     phone = decoded.get("phone_number")
 
+    if payload.gender not in {"Male", "Female", "Other", "Prefer not to say"}:
+        raise HTTPException(status_code=422, detail="Choose a valid gender option")
+
     existing = db.query(User).filter(User.phone == phone).first()
 
     if existing:
@@ -70,6 +73,7 @@ def signup_complete(
             first_name=payload.first_name.strip(),
             last_name=payload.last_name.strip(),
             email=str(payload.email).strip().lower(),
+            gender=payload.gender,
             is_verified=True,
         )
 
@@ -176,7 +180,12 @@ def update_me(
             user.last_name = payload.last_name
 
         if payload.email is not None:
-            user.email = payload.email
+            user.email = str(payload.email).strip().lower()
+
+        if payload.gender is not None:
+            if payload.gender not in {"Male", "Female", "Other", "Prefer not to say"}:
+                raise HTTPException(status_code=422, detail="Choose a valid gender option")
+            user.gender = payload.gender
 
         db.commit()
         db.refresh(user)
