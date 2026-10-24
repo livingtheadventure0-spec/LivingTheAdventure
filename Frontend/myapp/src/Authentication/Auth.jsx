@@ -152,7 +152,7 @@ export default function Auth() {
             );
 
             if (res.data.status === "LOGIN") {
-                navigate(location.state?.returnTo || "/", { replace: true });
+                navigate(location.state?.returnTo || location.state?.from || "/", { replace: true });
             } else if (res.data.status === "SIGNUP_REQUIRED") {
                 setOtpVerified(true);
                 setProfileRequired(true);
