@@ -9,6 +9,7 @@ class SignupCompleteRequest(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    gender: str
 
 class UserResponse(BaseModel):
     user_id: UUID
@@ -26,6 +27,7 @@ class UpdateUserRequest(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     email : Optional[EmailStr] = None
+    gender: Optional[str] = None
 
 class RequestEmailOTPRequest(BaseModel):
     email: EmailStr
