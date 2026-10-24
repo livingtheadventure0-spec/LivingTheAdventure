@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
 from html import escape
+import os
+from urllib.parse import unquote, urlparse
 
 from database.database import get_db
 from event.model.model import Event
-from upload.s3 import private_media_url
+from upload.s3 import bucket, client, private_media_url
 
 from event.service.service import (
     get_events,
@@ -48,6 +50,66 @@ def search_published_events(
         serialize_event_media(event)
         for event in search_events(db, query=q, limit=limit)
     ]
+
+
+@router.get("/{event_id}/poster-image", include_in_schema=False)
+def event_poster_image(event_id: int, db: Session = Depends(get_db)):
+    """Stream a published event's S3 poster for temporary browser sharing.
+
+    The object key comes only from the event record (never from a caller-supplied
+    URL), and only image objects in the expected media folders are served.
+    """
+    event = db.query(Event).filter(
+        Event.id == event_id,
+        Event.status == "published",
+    ).first()
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+
+    source_url = event.poster_horizontal_1_url or event.cover_image_url
+    if not source_url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event poster not found")
+
+    parsed = urlparse(str(source_url))
+    bucket_name = bucket()
+    region = os.environ.get("AWS_REGION", "")
+    allowed_hosts = {
+        f"{bucket_name}.s3.{region}.amazonaws.com",
+        f"{bucket_name}.s3.amazonaws.com",
+        f"s3.{region}.amazonaws.com",
+    }
+    if parsed.scheme != "https" or parsed.hostname not in allowed_hosts:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event poster is unavailable")
+
+    key_path = unquote(parsed.path.lstrip("/"))
+    if parsed.hostname == f"s3.{region}.amazonaws.com":
+        parts = key_path.split("/", 1)
+        if len(parts) != 2 or parts[0] != bucket_name:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event poster is unavailable")
+        key = parts[1]
+    else:
+        key = key_path
+
+    if not key or key.split("/", 1)[0] not in {"cover", "poster"}:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event poster is unavailable")
+
+    try:
+        obj = client().get_object(Bucket=bucket_name, Key=key)
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Could not retrieve event poster") from exc
+
+    content_type = obj.get("ContentType", "")
+    if not content_type.startswith("image/"):
+        obj["Body"].close()
+        raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Event poster is not an image")
+
+    headers = {
+        "Cache-Control": "private, max-age=60",
+        "X-Content-Type-Options": "nosniff",
+    }
+    if obj.get("ContentLength") is not None:
+        headers["Content-Length"] = str(obj["ContentLength"])
+    return StreamingResponse(obj["Body"].iter_chunks(chunk_size=64 * 1024), media_type=content_type, headers=headers)
 
 
 @router.get("/share/{event_id}", response_class=HTMLResponse, include_in_schema=False)
