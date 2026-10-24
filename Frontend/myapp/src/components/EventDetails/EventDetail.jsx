@@ -969,44 +969,28 @@ Plan your next adventure with Living The Adventure.`;
                         return;
                     }
 
-                    // Use our own backend as the image source. It streams only this
-                    // published event's stored poster, avoiding browser-to-S3 CORS.
-                    // The File remains in memory for the share operation; no persistent
-                    // browser storage is used.
-                    const fallbackWindow = window.open("", "_blank");
-                    try {
-                        const response = await fetch(
-                            apiUrl(`/events/${encodeURIComponent(event.id)}/poster-image`),
-                            { cache: "no-store" }
-                        );
-                        if (!response.ok) {
-                            throw new Error(`Poster download failed (HTTP ${response.status})`);
-                        }
+                    // Start the WhatsApp tab while this click is still trusted by the browser.
+                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
+                    const whatsappWindow = window.open("about:blank", "_blank");
 
-                        const blob = await response.blob();
-                        if (!blob.type.startsWith("image/")) {
-                            throw new Error("Poster response is not an image");
+                    const openWhatsApp = () => {
+                        if (whatsappWindow && !whatsappWindow.closed) {
+                            whatsappWindow.location.replace(whatsappUrl);
+                        } else {
+                            window.location.assign(whatsappUrl);
                         }
+                    };
 
-                        const extension = blob.type.includes("png")
+                    const downloadPoster = (blob, mimeType) => {
+                        const extension = mimeType.includes("png")
                             ? "png"
-                            : blob.type.includes("webp")
+                            : mimeType.includes("webp")
                                 ? "webp"
-                                : blob.type.includes("gif")
+                                : mimeType.includes("gif")
                                     ? "gif"
                                     : "jpg";
                         const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event";
-                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: blob.type });
-
-                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-                            fallbackWindow?.close();
-                            await navigator.share({ files: [file], title, text: marketingMessage });
-                            return;
-                        }
-
-                        // Desktop browsers cannot attach files to a WhatsApp URL.
-                        // Download a temporary copy for manual attachment, then open
-                        // WhatsApp with the prepared message.
+                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: mimeType });
                         const objectUrl = URL.createObjectURL(file);
                         const anchor = document.createElement("a");
                         anchor.href = objectUrl;
@@ -1014,22 +998,72 @@ Plan your next adventure with Living The Adventure.`;
                         document.body.appendChild(anchor);
                         anchor.click();
                         anchor.remove();
-                        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
-                    } catch (error) {
-                        // A user cancelling the native share sheet is not a failure.
-                        if (error?.name === "AbortError") {
-                            fallbackWindow?.close();
-                            return;
-                        }
-                        console.warn("Poster could not be prepared for sharing:", error);
-                        window.alert("Couldn't prepare the poster automatically. WhatsApp will open with your message; use “Open / download poster” to attach the image.");
-                    }
+                        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+                        return file;
+                    };
 
-                    const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
-                    if (fallbackWindow && !fallbackWindow.closed) {
-                        fallbackWindow.location.replace(whatsappUrl);
-                    } else {
-                        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+                    try {
+                        const response = await fetch(
+                            apiUrl(`/events/${encodeURIComponent(event.id)}/poster-image`),
+                            { cache: "no-store" }
+                        );
+                        if (!response.ok) {
+                            throw new Error(`Poster endpoint returned HTTP ${response.status}`);
+                        }
+
+                        const blob = await response.blob();
+                        // Some S3 uploads have a generic Content-Type even when their
+                        // bytes are a valid image. Do not reject the image on MIME alone.
+                        if (!blob.size) throw new Error("Poster response was empty");
+
+                        let mimeType = blob.type;
+                        if (!mimeType.startsWith("image/")) {
+                            const bytes = new Uint8Array(await blob.slice(0, 12).arrayBuffer());
+                            if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+                                mimeType = "image/png";
+                            } else if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+                                mimeType = "image/jpeg";
+                            } else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+                                bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+                                mimeType = "image/webp";
+                            } else if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
+                                mimeType = "image/gif";
+                            } else {
+                                throw new Error(`Poster response is not a recognized image (Content-Type: ${blob.type || "missing"})`);
+                            }
+                        }
+
+                        const file = downloadPoster(blob, mimeType);
+                        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+                            if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
+                            try {
+                                await navigator.share({ files: [file], title, text: marketingMessage });
+                                return;
+                            } catch (shareError) {
+                                if (shareError?.name === "AbortError") return;
+                                console.warn("Native image share failed; falling back to WhatsApp:", shareError);
+                            }
+                        }
+
+                        // Desktop WhatsApp Web does not expose an API for attaching a
+                        // local file from a click-to-chat URL. Download the poster and
+                        // open the message so the image can be attached manually.
+                        openWhatsApp();
+                    } catch (error) {
+                        console.error("Poster preparation failed:", error);
+                        // Never strand the user behind an alert. Open WhatsApp and
+                        // provide a direct poster tab as a fallback.
+                        const posterWindow = window.open(posterUrl, "_blank");
+                        if (!posterWindow) {
+                            const link = document.createElement("a");
+                            link.href = posterUrl;
+                            link.target = "_blank";
+                            link.rel = "noopener noreferrer";
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                        }
+                        openWhatsApp();
                     }
                 };
                 return (
