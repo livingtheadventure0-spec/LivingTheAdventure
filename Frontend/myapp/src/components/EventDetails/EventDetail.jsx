@@ -1016,6 +1016,11 @@ Plan your next adventure with Living The Adventure.`;
                         anchor.remove();
                         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
                     } catch (error) {
+                        // A user cancelling the native share sheet is not a failure.
+                        if (error?.name === "AbortError") {
+                            fallbackWindow?.close();
+                            return;
+                        }
                         console.warn("Poster could not be prepared for sharing:", error);
                         window.alert("Couldn't prepare the poster automatically. WhatsApp will open with your message; use “Open / download poster” to attach the image.");
                     }
