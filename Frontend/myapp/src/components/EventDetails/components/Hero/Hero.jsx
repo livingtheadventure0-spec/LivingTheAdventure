@@ -14,6 +14,8 @@ function Hero({
     const [showVideo, setShowVideo] = useState(false);
     const [fade, setFade] = useState(false);
 
+    // Keep the poster as the immediate hero visual. Do not request the original
+    // video until the initial page content has had time to render.
     useEffect(() => {
         const timer = setTimeout(() => setMinTimePassed(true), 3000);
         return () => clearTimeout(timer);
@@ -37,22 +39,27 @@ function Hero({
 
     return (
         <section className="relative isolate flex min-h-[min(780px,88svh)] w-full items-center justify-center overflow-hidden bg-black px-4 py-20 sm:px-6 sm:py-24 md:min-h-[80vh] md:px-8">
-            {/* Poster */}
-            <img
-                src={event_poster}
-                alt={event_title || "Event poster"}
-                className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ${showVideo ? "opacity-0" : "opacity-100"}`}
-                loading="eager"
-            />
+            {/* Load the poster first; it is the immediate visual fallback. */}
+            {event_poster && (
+                <img
+                    src={event_poster}
+                    alt={event_title || "Event poster"}
+                    width="1920"
+                    height="1080"
+                    fetchPriority="high"
+                    decoding="async"
+                    className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000 ${showVideo ? "opacity-0" : "opacity-100"}`}
+                />
+            )}
 
-            {/* Video */}
+            {/* Defer fetching the original video; do not transcode or replace it. */}
             {promo_video && (
                 <video
                     ref={videoRef}
-                    src={promo_video}
+                    src={minTimePassed ? promo_video : undefined}
                     muted
                     playsInline
-                    preload="auto"
+                    preload="metadata"
                     loop
                     aria-hidden="true"
                     className={`absolute inset-0 hidden h-full w-full object-cover transition-opacity duration-1000 sm:block ${showVideo ? "opacity-100" : "opacity-0"}`}
