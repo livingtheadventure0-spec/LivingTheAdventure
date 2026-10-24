@@ -26,6 +26,7 @@ import {
 } from "../../api/errors.js";
 
 import { useAuth } from "../../context/AuthContext.jsx";
+import { apiUrl } from "../../api/config.js";
 
 
 function EventDetail() {
@@ -968,24 +969,45 @@ Plan your next adventure with Living The Adventure.`;
                         return;
                     }
 
-                    // Open a window synchronously while the click gesture is active.
-                    // Browsers may block window.open after an awaited network request.
+                    // Use our own backend as the image source. It streams only this
+                    // published event's stored poster, avoiding browser-to-S3 CORS.
+                    // The File remains in memory for the share operation; no persistent
+                    // browser storage is used.
                     const fallbackWindow = window.open("", "_blank");
                     try {
-                        const response = await fetch(posterUrl, { mode: "cors" });
-                        if (!response.ok) throw new Error("Poster fetch failed");
+                        const response = await fetch(
+                            apiUrl(`/events/${encodeURIComponent(event.id)}/poster-image`),
+                            { cache: "no-store" }
+                        );
+                        if (!response.ok) {
+                            throw new Error(`Poster download failed (HTTP ${response.status})`);
+                        }
+
                         const blob = await response.blob();
-                        if (!blob.type.startsWith("image/")) throw new Error("Poster response is not an image");
-                        const extension = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
+                        if (!blob.type.startsWith("image/")) {
+                            throw new Error("Poster response is not an image");
+                        }
+
+                        const extension = blob.type.includes("png")
+                            ? "png"
+                            : blob.type.includes("webp")
+                                ? "webp"
+                                : blob.type.includes("gif")
+                                    ? "gif"
+                                    : "jpg";
                         const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event";
                         const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: blob.type });
+
                         if (navigator.share && navigator.canShare?.({ files: [file] })) {
                             fallbackWindow?.close();
                             await navigator.share({ files: [file], title, text: marketingMessage });
                             return;
                         }
 
-                        const objectUrl = URL.createObjectURL(blob);
+                        // Desktop browsers cannot attach files to a WhatsApp URL.
+                        // Download a temporary copy for manual attachment, then open
+                        // WhatsApp with the prepared message.
+                        const objectUrl = URL.createObjectURL(file);
                         const anchor = document.createElement("a");
                         anchor.href = objectUrl;
                         anchor.download = file.name;
@@ -994,17 +1016,15 @@ Plan your next adventure with Living The Adventure.`;
                         anchor.remove();
                         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
                     } catch (error) {
-                        // Cross-origin S3/CDN images may display in <img> while fetch is
-                        // blocked by CORS. Keep the message share usable regardless.
-                        console.warn("Poster could not be fetched for sharing:", error);
-                        window.alert("The poster could not be downloaded automatically (possibly due to storage CORS). Open / download poster separately and attach it in WhatsApp.");
+                        console.warn("Poster could not be prepared for sharing:", error);
+                        window.alert("Couldn't prepare the poster automatically. WhatsApp will open with your message; use “Open / download poster” to attach the image.");
                     }
 
                     const whatsappUrl = "https://wa.me/?text=" + encodeURIComponent(marketingMessage);
                     if (fallbackWindow && !fallbackWindow.closed) {
                         fallbackWindow.location.replace(whatsappUrl);
                     } else {
-                        window.location.assign(whatsappUrl);
+                        window.open(whatsappUrl, "_blank", "noopener,noreferrer");
                     }
                 };
                 return (
