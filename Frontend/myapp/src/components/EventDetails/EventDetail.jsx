@@ -981,7 +981,7 @@ Plan your next adventure with Living The Adventure.`;
                         }
                     };
 
-                    const downloadPoster = (blob, mimeType) => {
+                    const createPosterFile = (blob, mimeType) => {
                         const extension = mimeType.includes("png")
                             ? "png"
                             : mimeType.includes("webp")
@@ -990,7 +990,10 @@ Plan your next adventure with Living The Adventure.`;
                                     ? "gif"
                                     : "jpg";
                         const safeTitle = title.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "event";
-                        const file = new File([blob], `${safeTitle}-poster.${extension}`, { type: mimeType });
+                        return new File([blob], `${safeTitle}-poster.${extension}`, { type: mimeType });
+                    };
+
+                    const downloadPoster = (file) => {
                         const objectUrl = URL.createObjectURL(file);
                         const anchor = document.createElement("a");
                         anchor.href = objectUrl;
@@ -999,7 +1002,6 @@ Plan your next adventure with Living The Adventure.`;
                         anchor.click();
                         anchor.remove();
                         window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-                        return file;
                     };
 
                     try {
@@ -1033,7 +1035,7 @@ Plan your next adventure with Living The Adventure.`;
                             }
                         }
 
-                        const file = downloadPoster(blob, mimeType);
+                        const file = createPosterFile(blob, mimeType);
                         if (navigator.share && navigator.canShare?.({ files: [file] })) {
                             if (whatsappWindow && !whatsappWindow.closed) whatsappWindow.close();
                             try {
@@ -1048,6 +1050,7 @@ Plan your next adventure with Living The Adventure.`;
                         // Desktop WhatsApp Web does not expose an API for attaching a
                         // local file from a click-to-chat URL. Download the poster and
                         // open the message so the image can be attached manually.
+                        downloadPoster(file);
                         openWhatsApp();
                     } catch (error) {
                         console.error("Poster preparation failed:", error);
