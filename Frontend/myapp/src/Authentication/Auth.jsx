@@ -3,7 +3,7 @@ import axios from "axios";
 import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 import { auth } from "./firebase";
 import { apiUrl } from "../api/config.js";
-import { FaPhone, FaKey, FaSpinner, FaCheckCircle, FaArrowRight } from "react-icons/fa";
+import { FaPhone, FaKey, FaSpinner, FaCheckCircle, FaArrowRight, FaUser, FaEnvelope } from "react-icons/fa";
 import Logo from "../components/Common/Logo/logo.jsx";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
@@ -21,6 +21,9 @@ export default function Auth() {
     const [otp, setOtp] = useState("");
     const [confirmation, setConfirmation] = useState(null);
     const [otpSent, setOtpSent] = useState(false);
+    const [otpVerified, setOtpVerified] = useState(false);
+    const [profileRequired, setProfileRequired] = useState(false);
+    const [profile, setProfile] = useState({ first_name: "", last_name: "", email: "" });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -150,13 +153,65 @@ export default function Auth() {
 
             if (res.data.status === "LOGIN") {
                 navigate(location.state?.returnTo || "/", { replace: true });
+            } else if (res.data.status === "SIGNUP_REQUIRED") {
+                setOtpVerified(true);
+                setProfileRequired(true);
+                setSuccess("Phone verified. Complete your profile to create your account.");
             } else {
-                setError("User does not exist please sign-up");
+                setError("Unable to determine account status. Please try again.");
             }
 
         } catch (err) {
             console.error(err);
             setError("Something went wrong");
+        }
+    };
+
+    const completeSignup = async () => {
+        try {
+            setError("");
+            setSuccess("");
+            if (!profile.first_name.trim() || !profile.last_name.trim() || !profile.email.trim()) {
+                setError("First name, last name, and email are required.");
+                return;
+            }
+            const email = profile.email.trim().toLowerCase();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                setError("Enter a valid email address.");
+                return;
+            }
+            if (!auth.currentUser) {
+                setError("Your verification session expired. Please verify your phone again.");
+                setOtpSent(false);
+                setOtpVerified(false);
+                setProfileRequired(false);
+                return;
+            }
+
+            setLoading(true);
+            const token = await auth.currentUser.getIdToken();
+            await axios.post(
+                apiUrl("/auth/signup/complete"),
+                {
+                    first_name: profile.first_name.trim(),
+                    last_name: profile.last_name.trim(),
+                    email,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setSuccess("Your account is ready. Continuing...");
+            navigate(location.state?.returnTo || "/", { replace: true });
+        } catch (err) {
+            console.error(err);
+            if (err.response?.status === 409) {
+                setError(err.response?.data?.detail || "This phone number or email is already registered. Please log in.");
+            } else if (err.response?.status === 422) {
+                setError("Please check your name and email, then try again.");
+            } else {
+                setError("We couldn't create your profile. Please try again.");
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -237,16 +292,15 @@ export default function Auth() {
                             </div>
 
                             {/* OTP Input */}
-                            {otpSent && (
+                            {otpSent && !otpVerified && (
                                 <div className="mb-6 animate-slide-down">
-                                    <label className="block text-sm font-medium text-white mb-2">
-                                        Verification Code
-                                    </label>
+                                    <label className="block text-sm font-medium text-white mb-2">Verification Code</label>
                                     <div className="relative">
                                         <FaKey className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
                                         <input
                                             id="otp-input"
                                             type="text"
+                                            inputMode="numeric"
                                             placeholder="Enter 6-digit OTP"
                                             value={otp}
                                             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
@@ -258,27 +312,47 @@ export default function Auth() {
                                 </div>
                             )}
 
+                            {profileRequired && (
+                                <div className="mb-6 space-y-4 animate-slide-down">
+                                    <p className="text-sm text-slate-300">We couldn't find an account for this number. Add your details once to finish creating your profile.</p>
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">First name</label>
+                                        <div className="relative">
+                                            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            <input type="text" autoComplete="given-name" placeholder="Enter your first name" value={profile.first_name} onChange={(e) => setProfile({ ...profile, first_name: e.target.value })} className="w-full rounded-lg border border-white/20 bg-[#0f172a]/50 py-3.5 pl-12 pr-4 text-white focus:border-white/60 focus:outline-none" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">Last name</label>
+                                        <div className="relative">
+                                            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            <input type="text" autoComplete="family-name" placeholder="Enter your last name" value={profile.last_name} onChange={(e) => setProfile({ ...profile, last_name: e.target.value })} className="w-full rounded-lg border border-white/20 bg-[#0f172a]/50 py-3.5 pl-12 pr-4 text-white focus:border-white/60 focus:outline-none" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-slate-200">Email address</label>
+                                        <div className="relative">
+                                            <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                            <input type="email" autoComplete="email" placeholder="you@example.com" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="w-full rounded-lg border border-white/20 bg-[#0f172a]/50 py-3.5 pl-12 pr-4 text-white focus:border-white/60 focus:outline-none" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Main Action Button */}
                             <button
-                                onClick={otpSent ? verifyOtp : sendOtp}
-                                disabled={loading || (!otpSent && !phone) || (otpSent && otp.length !== 6)}
-                                className="w-full bg-black text-white py-3.5 rounded-lg font-semibold disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 group"
+                                onClick={profileRequired ? completeSignup : otpSent ? verifyOtp : sendOtp}
+                                disabled={loading || (!otpSent && !phone) || (otpSent && !otpVerified && otp.length !== 6) || (profileRequired && (!profile.first_name.trim() || !profile.last_name.trim() || !profile.email.trim()))}
+                                className="w-full bg-black text-white py-3.5 rounded-lg font-semibold disabled:cursor-not-allowed disabled:opacity-60 transition-all duration-200 flex items-center justify-center gap-2 group"
                             >
                                 {loading ? (
-                                    <>
-                                        <FaSpinner className="animate-spin" />
-                                        <span>Please wait...</span>
-                                    </>
+                                    <><FaSpinner className="animate-spin" /><span>Please wait...</span></>
+                                ) : profileRequired ? (
+                                    <><span>Create account & continue</span><FaArrowRight className="group-hover:translate-x-1 transition-transform" /></>
                                 ) : otpSent ? (
-                                    <>
-                                        <span>Verify & Login</span>
-                                        <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
-                                    </>
+                                    <><span>Verify OTP</span><FaArrowRight className="group-hover:translate-x-1 transition-transform" /></>
                                 ) : (
-                                    <>
-                                        <span>Send OTP</span>
-                                        {/* <FaArrowRight className="group-hover:translate-x-1 transition-transform" /> */}
-                                    </>
+                                    <><span>Send OTP</span><FaArrowRight className="group-hover:translate-x-1 transition-transform" /></>
                                 )}
                             </button>
 
