@@ -55,11 +55,21 @@ def signup_complete(
             detail="User already exists",
         )
 
+    existing_email = db.query(User).filter(
+        User.email == str(payload.email).strip().lower()
+    ).first()
+    if existing_email:
+        raise HTTPException(
+            status_code=409,
+            detail="This email address is already associated with another account",
+        )
+
     try:
         user = User(
             phone=phone,
-            first_name=payload.first_name,
-            last_name=payload.last_name,
+            first_name=payload.first_name.strip(),
+            last_name=payload.last_name.strip(),
+            email=str(payload.email).strip().lower(),
             is_verified=True,
         )
 
