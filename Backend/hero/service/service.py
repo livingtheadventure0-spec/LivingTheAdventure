@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import uuid4
 from typing import List, Optional
 from fastapi import HTTPException, status
@@ -75,10 +76,11 @@ def delete_hero(db: Session, db_obj: Hero):
     return
 
 def get_heroes_by_type(db: Session, hero_type: str) -> List[Hero]:
-    """Return heroes matching a type without case-sensitive mismatches.
+    """Return active heroes matching a type, case-insensitively.
 
     The admin form may save values such as "Home", while the public
-    frontend requests the same category as "home".
+    frontend requests the same category as "home". The active field is
+    stored as text, so accept common enabled values consistently.
     """
     normalized_type = hero_type.strip()
 
@@ -87,10 +89,13 @@ def get_heroes_by_type(db: Session, hero_type: str) -> List[Hero]:
 
     return (
         db.query(Hero)
-        .filter(Hero.hero_type.ilike(normalized_type))
+        .filter(
+            Hero.hero_type.ilike(normalized_type),
+            func.lower(func.trim(Hero.active)).in_(("true", "active", "1", "yes")),
+        )
+        .order_by(Hero.rank.asc().nullslast(), Hero.id.asc())
         .all()
     )
-
 
 
 def serialize_hero_media(hero: Hero) -> dict:
