@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import uuid4
 from typing import List, Optional
 from fastapi import HTTPException, status
