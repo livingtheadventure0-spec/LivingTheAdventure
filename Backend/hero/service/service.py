@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from uuid import uuid4
 from typing import List, Optional
 from fastapi import HTTPException, status
@@ -85,9 +86,16 @@ def get_heroes_by_type(db: Session, hero_type: str) -> List[Hero]:
     if not normalized_type:
         return []
 
+    # Public hero feeds must never expose inactive entries. The admin
+    # management page uses GET /heroes/ and still receives all entries.
+    # Normalize legacy string values because the database column is VARCHAR.
     return (
         db.query(Hero)
-        .filter(Hero.hero_type.ilike(normalized_type))
+        .filter(
+            Hero.hero_type.ilike(normalized_type),
+            func.lower(func.trim(Hero.active)).in_(("true", "active", "1", "yes")),
+        )
+        .order_by(Hero.rank.asc().nullslast(), Hero.id.asc())
         .all()
     )
 
